@@ -1,0 +1,448 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    min-width: 950px;
+    overflow: auto;
+}
+
+#fixedSelect {
+    position: fixed;
+    visibility: hidden;
+    top: 0px;
+}
+
+.faunaSelect {
+    margin-bottom: 16px;
+    z-index: 2;
+}
+
+.faunaSelectHolder {
+    position: relative;
+}
+
+.faunaSelectBackground {
+    background: green;
+    opacity: 0.1;
+    filter: alpha(opacity=10);       /* IE8 and lower */
+    /* set "zoom" to trigger "hasLayout" in IE 7 and lower */ 
+    zoom: 1; 
+}
+
+.selectForm {
+    position: absolute;
+    left: 35%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+select {
+    border: 1px solid black;
+}
+
+textarea {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+body {
+    margin: 0px;
+    margin-bottom: 55px;
+    padding: 0px;
+    font-family: georgia, 'times new roman', times, serif;
+}
+
+button {
+    margin: 10px;
+}
+
+img {
+    border: 2px solid #444444;
+    margin: 5px;
+}
+
+p {
+    clear: both;
+    margin: 8px 30px;
+    font-family: verdana, arial, helvetica, sans-serif;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.8em;
+    font-style: oblique;
+    color: #2A2A2A;
+}
+
+h1 a {
+    color: #409C46;
+    font-size: 1.3em;
+}
+
+h2 {
+    font-size: 2.2em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    margin-left: 20px;
+    margin-right: 8px;
+}
+
+#links ul {
+    list-style-type: none;
+    text-indent: -2em;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-left: 17px;
+}
+
+#links > ul > li {
+    margin-top: 9px;
+}
+
+#titleImage {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#titleImage img {
+    width: 800px;
+    height: 254px;
+    border: 2px solid black;
+}
+
+.imageInfo {
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 8px;
+    font-size: .9em;
+}
+
+#opaqueDiv {
+    visibility: hidden;
+    background: black;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-width: 1000px;
+    height: 100%;
+/*http://css-tricks.com/css-transparency-settings-for-all-broswers/*/
+	filter: alpha(opacity=65);
+	opacity: 0.65;
+    /* set "zoom" to trigger "hasLayout" in IE 7 and lower */ 
+    zoom: 1;
+    z-index: 2;
+}
+
+#detailDiv {
+    visibility: hidden;
+    background: white;
+    border: 6px solid black;
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    min-width: 700px;
+    z-index: 3;
+}
+
+#detailAnimal {
+    overflow: auto;
+    position: absolute;
+    top: 46px;
+    bottom: 0px;
+    width: 100%;
+}
+
+.detailImages {
+    text-align: center;
+}
+
+.detailImages img {
+    display: inline-block;
+}
+
+#detailControls {
+    height: 42px;
+    border-bottom: 4px solid black;
+    background: #eee;
+    text-align: center;
+}
+
+#detailControls img {
+    border: 0px;
+    margin: 4px 5px 0px 5px;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+}
+
+#detailClose {
+    border: 0px;
+    position: relative;
+    /*top: -47px;*/ /* see comment in js on setting this there */
+    float: right;
+}
+
+#detailCount {
+    position: relative;
+    bottom: 6px;
+    height: 42px;
+    display: inline-block;
+    width: 152px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 36px;
+}
+
+.thumbs {
+    display: inline-block;
+    vertical-align: middle;
+    background: white;
+    border: 4px solid black;
+    margin: 12px;
+    cursor: pointer;
+    position: relative;
+}
+
+.thumbs img {
+    margin: 12px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+#links {
+    margin-top: 0px;
+    margin-left: 15px;
+    padding-bottom: 10px;
+    padding-top: 8px;
+    border: 1px solid black;
+    width: 97%;
+    min-width: 900px;
+    background: #f3f3f5;
+}
+
+#links a:first-child {
+    font-size: 1.2em;
+    margin-right: 8px;
+}
+
+#links img {
+    margin-bottom: -2px;
+    margin-top: 5px;
+}
+
+#instructions {
+    visibility: hidden;
+    font-size: 26px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.verified, .unverified {
+    padding-left: 12px;
+    margin-right: 8px;
+    vertical-align: 4px;
+    font-size: .5em;
+    border: 1px solid black;
+}
+
+.verified {
+    background: green;
+}
+
+.unverified {
+    background: yellow;
+}
+
+#warning {
+    margin: 12px;
+    border: 2px solid #999999;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    background: #2435D9;
+}
+
+#innerWarning {
+    background: #fafafa;
+    margin: 2px;
+    padding: 8px;
+    border: 1px solid black;
+}
+
+#innerWarning strong {
+    font-size: 1.2em;
+}
+
+.title {
+    clear: both;
+    font-size: 1.8em;
+    color: #444444;
+    background: #DCDCE1;
+    border: 2px solid #555555;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.title b {
+    color: black;
+}
+
+#faunaDiv {
+    padding: 0px 15px;
+    min-width: 700px;
+    display: none;
+}
+
+#titleContainer {
+    position: relative;
+    margin-left: -10px;
+    margin-right: -10px;
+    /* apparently relative position elements z-index-compete with fixed
+       elements - this one needs to stay below the fixed position select */
+    z-index: -1;
+}
+
+#faunaLoading {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: #888888;
+    padding: 8px;
+}
+
+#fauna {
+    background: #efefef;
+    padding: 0px 10px;
+    border-left: 2px solid #dddddd;
+    border-right: 2px solid #dddddd;
+    border-bottom: 2px solid #dddddd;
+}
+
+#faunaTitle {
+    font-size: 2em;
+    color: #461F00;
+    background: #D8DDEB;
+    margin: 0px;
+    padding: 0px 6px 8px 6px;
+    border: 3px solid #6161FF;
+}
+
+.submissionTitle {
+    font-size: 1.2em;
+}
+
+.submissionBorder {
+    width: 8px;
+    margin-left: 15px;
+    margin-top: 10px;
+    padding-left: 8px;
+    border-left: 3px solid #dddddd;
+    border-top: 3px solid #dddddd;
+    border-bottom: 3px solid #dddddd;
+}
+
+.submission {
+    width: 880px;
+}
+
+.notesTitle {
+    margin-left: 8px;
+    font-size: 1.3em;
+    color: #5A5B71;
+}
+
+.animal {
+    margin-bottom: 20px;
+    padding-top: 5px;
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+.animal p {
+    max-width: 1000px;
+}
+
+.inputDiv {
+    padding: 10px;
+    margin: 10px;
+    margin-top: 15px;
+    border: 3px solid #555555;
+    position: relative;
+}
+
+.inputDiv select {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.inputTitle {
+    position: absolute;
+    padding: 2px 4px;
+    left: 12px;
+    top: -15px;
+    background: white;
+    border: 1px solid blue;
+}
+
+input {
+    margin: 3px;
+}
+
+.submissions {
+    clear: both;
+}
+
+.submittor {
+    font-size: 1.3em;
+    font-style: oblique;
+}
+
+.date {
+    font-style: oblique;
+    color: #555555;
+}
+
+.nameDate {
+    border-bottom: 1px solid blue;
+}
+
+.verify_button {
+    border: 4px solid #0F6E14;
+}
+
+.nameTip {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    margin-right: 4px;
+    padding: 4px;
+    visibility: hidden;
+    border: 2px solid gray;
+    background: #F4F5D1;
+}
+
+.nameTipOn {
+    margin: 4px;
+    padding: 4px;
+    border: 2px solid gray;
+    background: #fffff7;
+}
+
+.classification {
+    margin-bottom: 8px;
+}
+
+.taxon {
+    margin-left: 2em;
+}
+
+.taxonTitle {
+    color: #777777;
+}
