@@ -39,6 +39,10 @@ select {
     border: 1px solid black;
 }
 
+#treeForm p {
+    margin-left: 8px;
+}
+
 textarea {
     margin-top: 4px;
     margin-bottom: 4px;
@@ -146,6 +150,27 @@ h2 {
     z-index: 3;
 }
 
+#treeDetailDiv {
+    visibility: hidden;
+    background: white;
+    border: 6px solid black;
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    min-width: 700px;
+    z-index: 3;
+}
+
+.treeThumbs {
+    background: white;
+    border: 1px solid #999;
+    padding: 2px;
+    margin: 2px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
 #detailAnimal {
     overflow: auto;
     position: absolute;
@@ -154,11 +179,34 @@ h2 {
     width: 100%;
 }
 
-.detailImages {
+#treeDetailImages {
+    overflow: auto;
+    position: absolute;
+    top: 52px;
+    bottom: 0px;
+    width: 100%;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.treeAnimal {
+    background: #f1f1f1;
+    margin-bottom: 4px;
+    margin-left: 32px;
+    margin-right: 12px;
+    padding-bottom: 5px;
+    padding-left: 2px;
+    padding-top: 2px;
+    padding-right: 2px;
+    border: 2px solid #ccc;
+    width: 900px;
+}
+
+.detailImages, #treeDetailImages {
     text-align: center;
 }
 
-.detailImages img {
+.detailImages img, #treeDetailImages img {
     display: inline-block;
 }
 
@@ -177,7 +225,7 @@ h2 {
     display: inline-block;
 }
 
-#detailClose {
+#detailClose, #treeDetailClose {
     border: 0px;
     position: relative;
     /*top: -47px;*/ /* see comment in js on setting this there */
@@ -290,6 +338,20 @@ h2 {
     padding-right: 10px;
 }
 
+#treeDetailTitle {
+    font-size: 1.8em;
+    color: #444444;
+    background: #DCDCE1;
+    border: 2px solid #555555;
+    margin-left: 8px;
+    margin-top: 8px;
+    margin-right: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .title b {
     color: black;
 }
@@ -317,7 +379,7 @@ h2 {
     padding: 8px;
 }
 
-#fauna {
+#thumbFauna {
     background: #efefef;
     padding: 0px 10px;
     border-left: 2px solid #dddddd;
@@ -444,5 +506,73 @@ input {
 }
 
 .taxonTitle {
-    color: #777777;
+    color: #777;
+}
+
+.oddSolid {
+    margin-left: 2em;
+    border-left: 1px solid #333;
+}
+
+.oddSoft {
+    margin-left: 2em;
+    border-left: 1px solid #ccc;
+}
+
+.evenSolid {
+    margin-left: 2em;
+    border-left: 1px dashed #333;
+}
+
+.evenSoft {
+    margin-left: 2em;
+    border-left: 1px dashed #ccc;
+}
+
+.treeTaxonTitleDiv {
+    position: relative;
+    left: -20px;
+    background: white;
+    padding: 4px;
+}
+
+.treeTaxonTitle {
+    color: #777;
+}
+
+.solidTitle {
+    font-weight: bold;
+    font-size: 1.4em;
+}
+
+.solidTitle .treeTaxonTitle {
+    color: #406293;
+}
+
+.Species, .Genus, .Family, .Order, .Class {
+    font-weight: bold;
+    font-size: 1.4em;
+}
+
+.Species .treeTaxonTitle {
+    color: #A55650;
+}
+
+.Genus .treeTaxonTitle {
+    color: #259B23;
+}
+
+.Family .treeTaxonTitle {
+    font-weight: bold;
+    color: #406293;
+}
+
+.Order .treeTaxonTitle {
+    font-weight: bold;
+    color: #6B4578;
+}
+
+.Class .treeTaxonTitle {
+    font-weight: bold;
+    color: #A48236;
 }

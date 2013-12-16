@@ -128,19 +128,22 @@ this one, covering the flora of Pheasant Branch Conservancy.
   </div>
 </div>
 
-<p>
-<br />
-<br />
-</p>
 <div id="instructions">
   Click on an image for more information.
 </div>
+<form id="treeForm" action="">
+  <p>
+    <input type="checkbox" id="treeViewBox" value="treeview" />
+    Display fauna in tree view<br /><br />
+  </p>
+</form>
 <div id="faunaDiv">
   <div id="titleContainer">
     <div id="faunaTitle"></div>
     <div id="faunaLoading"></div>
   </div>
-  <div id="fauna"></div>
+  <div id="treeFauna"></div>
+  <div id="thumbFauna"></div>
 </div>
 
 <div id="opaqueDiv"></div>
@@ -156,6 +159,14 @@ this one, covering the flora of Pheasant Branch Conservancy.
     <img id="detailClose" src="images/close.png" alt="Close detail view" width="35px" height="35px" />
   </div>
   <div id="detailAnimal"></div>
+</div>
+
+<div id="treeDetailDiv">
+  <div>
+    <img id="treeDetailClose" src="../fopb/public/fauna/images/close.png" alt="Close detail view" width="35px" height="35px" />
+  </div>
+  <div id="treeDetailTitle"></div>
+  <div id="treeDetailImages"></div>
 </div>
 
 </body>

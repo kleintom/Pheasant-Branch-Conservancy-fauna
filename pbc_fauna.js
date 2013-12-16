@@ -25,10 +25,10 @@ fauna.displayThumbCategory = function(category, data) {
     return b.common < a.common ? 1 : -1;
   }
   data = data.sort(sortFunction);
-  fauna.categoryData[category] = data; // save for detail requests
+  fauna.thumbCategoryData[category] = data; // save for detail requests
   fauna.currentCategory = category;
 
-  var faunaDiv = document.getElementById("fauna");
+  var faunaDiv = document.getElementById("thumbFauna");
   faunaDiv.innerHTML = ""; // bye bye
   for (var i = 0; i < data.length; ++i) { // for each animal
       
@@ -63,7 +63,7 @@ fauna.displayThumbCategory = function(category, data) {
     thumbsDiv.appendChild(tipDiv);
     faunaDiv.appendChild(thumbsDiv);
   }
-  fauna.categoryHTML[category] = faunaDiv.innerHTML;
+  fauna.thumbCategoryHTML[category] = faunaDiv.innerHTML;
   fauna.scrollToId("instructions");
 };
 
@@ -119,26 +119,36 @@ fauna.cancelThumbTip = function(tipDiv) {
 // reassign them.
 fauna.renewClickHandlers = function() {
 
-  var data = fauna.categoryData[fauna.currentCategory];
-  for (var i = 0; i < data.length; ++i) { // for each animal
-    var thisAnimal = data[i];
-    var thumbsDiv = document.getElementById(thisAnimal.id);
-    thumbsDiv.onclick = fauna.createDetailClickHandler(i);
-    // renew the tip handlers
-    var  images = thisAnimal.images.split(',');
-    if (images[0] >= 100) { // needs a tip handler
-      var thisId = thisAnimal.id;
-      var thumbsDiv = document.getElementById(thisId);
-      var tipDiv = document.getElementById(thisId + 'nameTip');
-      thumbsDiv.onmouseover = fauna.createTipDisplayFunction(tipDiv);
-      thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
-    }      
+  if (fauna.getViewType() === 'thumb') {
+    var data = fauna.thumbCategoryData[fauna.currentCategory];
+    for (var i = 0; i < data.length; ++i) { // for each animal
+      var thisAnimal = data[i];
+      var thumbsDiv = document.getElementById(thisAnimal.id);
+      thumbsDiv.onclick = fauna.createDetailClickHandler(i);
+      // renew the tip handlers
+      var  images = thisAnimal.images.split(',');
+      if (images[0] >= 100) { // needs a tip handler
+        var thisId = thisAnimal.id;
+        var thumbsDiv = document.getElementById(thisId);
+        var tipDiv = document.getElementById(thisId + 'nameTip');
+        thumbsDiv.onmouseover = fauna.createTipDisplayFunction(tipDiv);
+        thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
+      }      
+    }
+  }
+  else { // tree view
+    var data = fauna.treeCategoryData[fauna.currentCategory];
+    for (var i = 0; i < data.length; ++i) { // for each animal
+      var thisAnimal = data[i];
+      var thumbsDiv = document.getElementById('th' + i);
+      thumbsDiv.onclick = fauna.createTreeThumbsClickHandler(i);
+    }
   }
 };
 
 fauna.categoryLength = function() {
 
-  return fauna.categoryData[fauna.currentCategory].length;
+  return fauna.thumbCategoryData[fauna.currentCategory].length;
 }
 
 // Update the detail controls based on the current detail index.
@@ -212,9 +222,27 @@ fauna.createDetailClickHandler = function(i) {
 fauna.loadDetailAnimal = function(index) {
 
   fauna.detailAnimal.innerHTML = "";
-  var animal = fauna.categoryData[fauna.currentCategory][index];
+  var animal = fauna.thumbCategoryData[fauna.currentCategory][index];
   fauna.detailAnimal.appendChild(fauna.createAnimalDetailDiv(animal));
   fauna.setDisplayedIndex(index + 1);
+};
+
+// Input is the index (0-based!) of the animal in the current category
+// to create the detail for.
+fauna.createTreeThumbsClickHandler = function(i) {
+
+  return function() {
+    fauna.loadTreeDetailAnimal(i);
+    fauna.setTreeDetailVisible(true);
+  };
+};
+
+// Load animal with <index> (0-based!) in the tree detail div, removing any
+// previous animal.
+fauna.loadTreeDetailAnimal = function(index) {
+
+  var animal = fauna.treeCategoryData[fauna.currentCategory][index];
+  fauna.createTreeAnimalDetailDiv(animal);
 };
 
 // Display the <index> (1-based!) of the detail animal in the detail
@@ -274,7 +302,7 @@ fauna.preloadImages = function(index) {
   if (index < 0 || index >= fauna.categoryLength()) {
     return;
   }
-  var animal = fauna.categoryData[fauna.currentCategory][index];
+  var animal = fauna.thumbCategoryData[fauna.currentCategory][index];
   var images = animal.images.split(',');
   // There's some indication online that individual img objects are
   // necessary to actually preload multiple images
@@ -288,23 +316,34 @@ fauna.preloadImages = function(index) {
 // Make the detail div visible if <visible> is true, else hide it.
 fauna.setDetailVisible = function(visible) {
 
+  fauna.setDetailVisibilityOnDiv(fauna.detailDiv, visible);
+  // make sure the thumb tool tip is hidden either way
+  fauna.cancelThumbTip();
+};
+
+// Make the tree detail div visible if <visible> is true, else hide it.
+fauna.setTreeDetailVisible = function(visible) {
+
+  fauna.setDetailVisibilityOnDiv(fauna.treeDetailDiv, visible);
+};
+
+fauna.setDetailVisibilityOnDiv = function(detailDiv, visible) {
+
   if (visible) {
     // disable scrolling on main window
     // NOTE that keyboard scrolling is still active
     document.body.style.overflowY= 'hidden';
-    fauna.detailDiv.style.top = fauna.pageYOffset() + 16 + "px";
-    fauna.detailDiv.style.height = fauna.windowHeight() - 50 + "px";
+    detailDiv.style.top = fauna.pageYOffset() + 16 + "px";
+    detailDiv.style.height = fauna.windowHeight() - 50 + "px";
     fauna.opaqueDiv.style.visibility = 'visible';
-    fauna.detailDiv.style.visibility = 'visible';
+    detailDiv.style.visibility = 'visible';
   }
   else {
     fauna.opaqueDiv.style.visibility = 'hidden';
-    fauna.detailDiv.style.visibility = 'hidden';
+    detailDiv.style.visibility = 'hidden';
     // enable scrolling on main window
     document.body.style.overflowY= 'visible';
   }
-  // make sure the thumb tool tip is hiddent either way
-  fauna.cancelThumbTip();
 };
 
 // Given <animal> data, return a div displaying the animal's info.
@@ -354,7 +393,6 @@ fauna.createAnimalDetailDiv = function(animal) {
   // images
   var images = animal.images.split(',');
   var firstImageNumber = parseInt(images[0], 10);
-  console.log(firstImageNumber);
   if (firstImageNumber > 100) { // image numbers < 100 are special category
     var imagesDiv = document.createElement('div');
     imagesDiv.setAttribute('class', 'detailImages');
@@ -368,27 +406,46 @@ fauna.createAnimalDetailDiv = function(animal) {
   return animalDiv;
 };
 
-// Append data from taxonomyList to parentElement.
-fauna.addClassification = function(parentElement, taxonomyList) {
+// fill in the treeDetailDiv with this animal's info
+fauna.createTreeAnimalDetailDiv = function(animal) {
 
-  taxonTitles = {};
-  taxonTitles['c'] = "Class";
-  taxonTitles['sc'] = "Subclass";
-  taxonTitles['uo'] = "Superorder";
-  taxonTitles['o'] = "Order";
-  taxonTitles['io'] = "Infraorder";
-  taxonTitles['so'] = "Suborder";
-  taxonTitles['uf'] = "Superfamily";
-  taxonTitles['f'] = "Family";
-  taxonTitles['sf'] = "Subfamily";
-  taxonTitles['ut'] = "Supertriber";
-  taxonTitles['t'] = "Tribe";
-  taxonTitles['st'] = "Subtribe";
-  taxonTitles['g'] = "Genus";
-  taxonTitles['sg'] = "Subgenus";
-  taxonTitles['s'] = "Species";
-  taxonTitles['ss'] = "Subspecies";
-  taxonTitles['nt'] = "No Taxon";
+  // title
+  fauna.treeDetailTitle.innerHTML = '<b><i>' + animal.scientific +
+    '</i>&nbsp;&nbsp;--&nbsp;&nbsp;' + animal.common + '</b>';
+
+  // images
+  var images = animal.images.split(',');
+  if (images[0] > 100) { // image numbers < 100 are special category
+    treeDetailImages.innerHTML = '';
+    for (var i = 0; i < images.length; ++i) {
+      var imageElt = document.createElement('img');
+      imageElt.setAttribute('src', '../fopb/public/fauna/images/' + images[i] + '.jpg');
+      treeDetailImages.appendChild(imageElt);
+    }
+  }
+};
+
+fauna.taxonTitles = {};
+fauna.taxonTitles['c'] = "Class";
+fauna.taxonTitles['sc'] = "Subclass";
+fauna.taxonTitles['uo'] = "Superorder";
+fauna.taxonTitles['o'] = "Order";
+fauna.taxonTitles['io'] = "Infraorder";
+fauna.taxonTitles['so'] = "Suborder";
+fauna.taxonTitles['uf'] = "Superfamily";
+fauna.taxonTitles['f'] = "Family";
+fauna.taxonTitles['sf'] = "Subfamily";
+fauna.taxonTitles['ut'] = "Supertribe";
+fauna.taxonTitles['t'] = "Tribe";
+fauna.taxonTitles['st'] = "Subtribe";
+fauna.taxonTitles['g'] = "Genus";
+fauna.taxonTitles['sg'] = "Subgenus";
+fauna.taxonTitles['s'] = "Species";
+fauna.taxonTitles['ss'] = "Subspecies";
+fauna.taxonTitles['nt'] = "No Taxon";
+
+// Append data from taxonomyList to parentElement
+fauna.addClassification = function(parentElement, taxonomyList) {
 
   var container = document.createElement('div');
   var titleDiv = document.createElement('div');
@@ -410,11 +467,10 @@ fauna.addClassification = function(parentElement, taxonomyList) {
 
     var titleSpan = document.createElement('span');
     titleSpan.setAttribute('class', 'taxonTitle');
-    titleSpan.appendChild(document.createTextNode(taxonTitles[taxonTitle] + ' '));
+    titleSpan.appendChild(document.createTextNode(fauna.taxonTitles[taxonTitle] + ' '));
     thisTaxonDiv.appendChild(titleSpan);
 
     var nameSpan = document.createElement('span');
-    nameSpan.setAttribute('class', 'taxonDesc');
     if (taxonTitle == 'g') { // genus
       genus = taxonName;
       var italics = document.createElement('i');
@@ -470,11 +526,11 @@ fauna.createNotesElement = function(notesTitle, notesText) {
   return notesDiv;
 };
 
-fauna.displayInstructions = function() {
+fauna.displayInstructions = function(visibile) {
 
-  document.getElementById('instructions').style.visibility = 'visible';
-  // Okay, it's visible now forevermore
-  fauna.displayInstructions = function() {};
+  var value = 'visible';
+  if (!visibile) { value = 'hidden'; }
+  document.getElementById('instructions').style.visibility = value;
 };
 
 fauna.getSelectCount = function() {
@@ -513,6 +569,42 @@ fauna.createSelect = function() {
   return form;
 };
 
+fauna.loadCurrentCategory = function() {
+
+  var category = fauna.currentCategory;
+  document.getElementById("faunaTitle").innerHTML =
+    fauna.getCategoryTitle(category);
+  if (fauna.getViewType() === 'thumb') {
+    fauna.loadCurrentCategoryHelper('thumbFauna', true, category,
+                                    fauna.thumbCategoryHTML[category],
+                                    'instructions');
+  }
+  else { // tree view
+    fauna.loadCurrentCategoryHelper('treeFauna', false, category,
+                                    fauna.treeCategoryHTML[category],
+                                    'treeForm');
+  }
+};
+
+fauna.loadCurrentCategoryHelper = function(faunaDivId,
+                                           maybeDisplayInstructions,
+                                           category,
+                                           categoryHTML,
+                                           idToScrollTo) {
+    // bye bye to the previous category
+    document.getElementById(faunaDivId).innerHTML = "";
+    fauna.displayInstructions(maybeDisplayInstructions);
+    if (categoryHTML) {
+      document.getElementById(faunaDivId).innerHTML = categoryHTML;
+      fauna.renewClickHandlers();
+      fauna.removeLoading();
+      fauna.scrollToId(idToScrollTo);
+    }
+    else {
+      fauna.loadCategory(category);
+    }  
+};
+
 // Apparently need to use a closure here since IE doesn't set "this" on
 // event handlers
 fauna.selectChanged = function(select) {
@@ -527,21 +619,7 @@ fauna.selectChanged = function(select) {
     }
     fauna.currentCategory = category;
     fauna.setVisible();
-     // bye bye to the previous category
-    document.getElementById("fauna").innerHTML = "";
-    document.getElementById("faunaTitle").innerHTML =
-      fauna.getCategoryTitle(category);
-
-    var categoryHTML = fauna.categoryHTML[category];
-    if (categoryHTML) {
-      document.getElementById("fauna").innerHTML = categoryHTML;
-      fauna.renewClickHandlers();
-      fauna.removeLoading();
-      fauna.scrollToId("instructions");
-    }
-    else {
-      fauna.loadCategory(category);
-    }
+    fauna.loadCurrentCategory();
     document.getElementById('select1').blur();
     document.getElementById('select2').blur();
   };
@@ -590,6 +668,8 @@ fauna.detailClickUp = function(id) {
 };
 
 fauna.ignoreDetailClick = function(id) {
+
+  if (fauna.getViewType() === 'tree') { return false; } // don't ignore 
 
   if (fauna.curDetailIndex() === 0 &&
       (id === "detailLeft" || id === "detailFullLeft")) {
@@ -653,6 +733,200 @@ fauna.getData = function(xml, elementName) {
   }
 };
 
+fauna.listSortOne = function(a, b) { return b[1] < a[1] ? 1 : -1; };
+fauna.sortByScientific = function(a, b) {
+  return b.scientific < a.scientific ? 1 : -1;
+};
+
+
+// nodeList is added to stack in reverse alpha order; parent is the
+// html div parent for the nodes in nodeList.  Returns an ordered list
+// of animal data objects for the nodes in nodeList that were actual
+// animal entries (not just taxon entries)
+fauna.addTaxaNodeListToStack = function(nodeList, stack, parent) {
+
+  // only taxa get added to the stack
+  var taxonArray = [];
+  // actual animal entries get returned separately
+  var animalsArray = [];
+  var tagName = "";
+  for (var i = 0; i < nodeList.length; ++i) {
+    var thisItem = nodeList[i];
+    var thisTagName = thisItem.tagName;
+    if (thisTagName !== 'z') { // taxon entry
+      var taxonName = thisItem.getAttribute('t');
+      // (note: it's not necessarily true that all non-<z> children have
+      // the same tagName, so need to remember each one)
+      taxonArray.push([thisItem, taxonName, thisTagName]);
+    }
+    else { // animal entry
+      animalsArray.push(fauna.loadAnimalFromXml(thisItem));
+    }
+  }
+  taxonArray.sort(fauna.listSortOne);
+  for (var i = taxonArray.length - 1; i >= 0; --i) {
+    stack.push([parent, taxonArray[i]]);
+  }
+
+  if (animalsArray.length > 0) {
+    animalsArray.sort(fauna.sortByScientific);
+  }
+  return animalsArray;    
+};
+
+fauna.loadAnimalFromXml = function(xmlAnimal) {
+
+  var animalObject = {};
+  animalObject.common = fauna.getData(xmlAnimal, 'c');
+  animalObject.images = fauna.getData(xmlAnimal, 'i');
+  animalObject.id = fauna.getData(xmlAnimal, 'n');
+  animalObject.scientific = fauna.getData(xmlAnimal, 'sc');
+  animalObject.history = fauna.getData(xmlAnimal, 'h');
+  animalObject.links = fauna.getData(xmlAnimal, 'l');
+  animalObject.identification = fauna.getData(xmlAnimal, 'id');
+  return animalObject;
+};
+
+fauna.lineStyles = {};
+fauna.lineStyles['e'] = {'s' : 'evenSolid', 'd' : 'evenSoft' };
+fauna.lineStyles['o'] = {'s' : 'oddSolid', 'd' : 'oddSoft' };
+
+fauna.addTreeViewDiv = function(tagName, taxonName, parent) {
+
+  var maybeSolid = 'd'; // 'd'otted
+  var titleClass = '';
+  if (tagName == 's' || tagName === 'g' || tagName === 'f' ||
+      tagName === 'o' || tagName === 'c') {
+    maybeSolid = 's';
+    titleClass = 'solidTitle';
+  }  
+  var newTaxon = document.createElement('div');
+  newTaxon.setAttribute('class', fauna.lineStyles[parent.eo()][maybeSolid]);
+  var titleDiv = document.createElement('div');
+  var taxonTitle = fauna.taxonTitles[tagName];
+  titleDiv.setAttribute('class', titleClass + ' ' + 'treeTaxonTitleDiv');
+  var taxonTitleSpan = document.createElement('span');
+  taxonTitleSpan.setAttribute('class', 'treeTaxonTitle');
+  taxonTitleSpan.appendChild(document.createTextNode(taxonTitle));
+  var taxonNameSpan = document.createElement('span');
+  taxonNameSpan.setAttribute('class', 'treeTaxonDesc');
+  taxonNameSpan.appendChild(document.createTextNode(' ' + taxonName));
+
+  titleDiv.appendChild(taxonTitleSpan);
+  titleDiv.appendChild(taxonNameSpan);
+  newTaxon.appendChild(titleDiv);
+  parent.obj().appendChild(newTaxon);
+  return fauna.eoObject(newTaxon, parent.eo());
+};
+
+fauna.addTreeViewAnimalDivs = function(animals, parent) {
+
+  var categoryData = fauna.treeCategoryData[fauna.currentCategory];
+  for (var i = 0; i < animals.length; ++i) {
+    var thisAnimal = animals[i];
+    var animalDiv = document.createElement('div');
+    animalDiv.setAttribute('class', 'treeAnimal');
+    //// title
+    var titleDiv = document.createElement('div');
+    titleDiv.setAttribute('class', 'title');
+    titleDiv.innerHTML = '<b><i>' + thisAnimal.scientific +
+      '</i>&nbsp;&nbsp;--&nbsp;&nbsp;' + thisAnimal.common + '</b>';
+    animalDiv.appendChild(titleDiv);
+    //// images
+    var images = thisAnimal.images.split(',');
+    // the number of animals added to this category prior to this one
+    // = future index of this animal in categoryData (see below)
+    var animalCount = categoryData.length;
+    if (images[0] >= 100) { // < 100 is special category stuff
+      var thumbsDiv = document.createElement('div');
+      thumbsDiv.setAttribute('class', 'treeThumbs');
+      thumbsDiv.setAttribute('id', 'th' + animalCount);
+      for (var j = 0; j < images.length; ++j) {
+        var imageElt = document.createElement('img');
+        imageElt.setAttribute('src', '../fopb/public/fauna/images/z' + images[j] + '.jpg');
+        thumbsDiv.appendChild(imageElt);
+      }
+      animalDiv.appendChild(thumbsDiv);
+      // remember this animal for the next time this category is loaded
+      var shortAnimal = {};
+      shortAnimal.id = thisAnimal.id;
+      shortAnimal.images = thisAnimal.images;
+      shortAnimal.common = thisAnimal.common;
+      shortAnimal.scientific = thisAnimal.scientific;
+      categoryData.push(shortAnimal);
+      thumbsDiv.onclick = fauna.createTreeThumbsClickHandler(animalCount);
+    }
+    // history
+    if (thisAnimal.history) {
+      animalDiv.appendChild(fauna.createNotesElement('Life history and ecology',
+                                                     thisAnimal.history));
+    }
+    // id info
+    if (thisAnimal.identification) {
+      animalDiv.appendChild(fauna.createNotesElement('Identification Notes',
+                                                     thisAnimal.identification));
+    }
+    // links
+    if (thisAnimal.links) {
+      animalDiv.appendChild(fauna.createNotesElement('Links',
+                                                     thisAnimal.links));
+    }
+    parent.obj().appendChild(animalDiv);
+  }   
+};
+
+fauna.eoObject = function(object, oldEo) {
+  
+  var that = {};
+  that.obj = function() { return object; };
+  that.eo = function() { return oldEo === 'e' ? 'o' : 'e'; };
+  return that;
+};  
+
+fauna.loadTreeViewFromXml = function(dom) {
+
+  var root = dom.documentElement;
+  var classes = root.childNodes; // taxonomy classes, not CS classes
+  var faunaDiv = document.getElementById("treeFauna");
+  var parent = fauna.eoObject(faunaDiv, 'e');
+  var stack = [];
+  fauna.addTaxaNodeListToStack(classes, stack, parent);
+  while (stack.length) {
+    var thisTaxon = stack.pop();
+    parent = thisTaxon[0];
+    var tagName = thisTaxon[1][2];
+    var taxonName = thisTaxon[1][1];
+    var taxonXmlNode = thisTaxon[1][0];
+    parent = fauna.addTreeViewDiv(tagName, taxonName, parent);
+    var animalsAtThisTaxon = 
+      fauna.addTaxaNodeListToStack(taxonXmlNode.childNodes, stack, parent);
+    fauna.addTreeViewAnimalDivs(animalsAtThisTaxon, parent);
+  }
+  fauna.treeCategoryHTML[fauna.currentCategory] = faunaDiv.innerHTML;
+  fauna.scrollToId("treeForm");
+};
+
+fauna.getViewType = function() {
+
+  return document.getElementById('treeViewBox').checked ? 'tree' : 'thumb';
+};
+
+fauna.setupViewMode = function(mode) {
+
+  if (!fauna.currentCategory) { return; }
+
+  if (mode === 'thumb') {
+    // hide the tree view
+    document.getElementById('treeFauna').innerHTML = '';
+    fauna.loadCurrentCategory();
+  }
+  else {
+    // hide the thumb view
+    document.getElementById('thumbFauna').innerHTML = '';
+    fauna.loadCurrentCategory();
+  }
+};
+
 fauna.loadAnimalsFromXML = function(dom) {
 
   var root = dom.documentElement;
@@ -675,16 +949,10 @@ fauna.loadAnimalsFromXML = function(dom) {
             childNodes.push([child, taxonParent + tagName + '@' + taxonName + '!']);
           }
           else { // an animal
-            var animalObject = {};
-            animalObject.common = fauna.getData(child, 'c');
-            animalObject.images = fauna.getData(child, 'i');
-            animalObject.id = fauna.getData(child, 'n');
-            animalObject.scientific = fauna.getData(child, 'sc');
-            animalObject.history = fauna.getData(child, 'h');
-            animalObject.links = fauna.getData(child, 'l');
-            animalObject.identification = fauna.getData(child, 'id');
+            var animalObject = fauna.loadAnimalFromXml(child);
             // remove the trailing ! on taxonParent
-            animalObject.taxonomy = taxonParent.substring(0, taxonParent.length - 1);
+            animalObject.taxonomy =
+              taxonParent.substring(0, taxonParent.length - 1);
             animals.push(animalObject);
           }
         }
@@ -707,9 +975,14 @@ fauna.ajaxCategoryHandler = function(request) {
       //alert(request.responseText);
       var dom = request.responseXML;
       var category = dom.documentElement.tagName;
-      animalsList = fauna.loadAnimalsFromXML(dom);
-      fauna.displayThumbCategory(category, animalsList);
-      fauna.displayInstructions();
+      if (fauna.getViewType() === 'thumb') {
+        animalsList = fauna.loadAnimalsFromXML(dom);
+        fauna.displayThumbCategory(category, animalsList);
+        fauna.displayInstructions(true);
+      }
+      else {
+        fauna.loadTreeViewFromXml(dom);
+      }
     }
   }
 };
@@ -831,9 +1104,11 @@ fauna.categories = [{id: 'bees', title: 'Bees'},
                     {id: 'wasps', title: 'Wasps'}];
 
 // we remember the innerHTML of categories that have already been loaded
-fauna.categoryHTML = {};
+fauna.thumbCategoryHTML = {};
+fauna.treeCategoryHTML = {};
 // an array of animal data for each category
-fauna.categoryData = {};
+fauna.thumbCategoryData = {};
+fauna.treeCategoryData = {};
 // remember the current category (as a string)
 fauna.currentCategory = "";
 // timer id for the thumb images "tool tip"
@@ -876,12 +1151,25 @@ window.onload = function() {
   fauna.fixedSelect = document.getElementById('fixedSelect');
 
   fauna.detailDiv = document.getElementById('detailDiv');
+  fauna.treeDetailDiv = document.getElementById('treeDetailDiv');
+  fauna.treeDetailTitle = document.getElementById('treeDetailTitle');
   fauna.detailAnimal = document.getElementById('detailAnimal');
+  fauna.treeDetailImages = document.getElementById('treeDetailImages');
   fauna.detailCount = document.getElementById('detailCount');
   fauna.opaqueDiv = document.getElementById('opaqueDiv');
 
+  document.getElementById('treeViewBox').onclick = function() {
+
+    fauna.setupViewMode(fauna.getViewType());
+  };
+
   fauna.setDetailControlEvents();
   fauna.preloadDetailControlImages();
+
+  // initialize tree view data structure
+  for (var i = 0; i < fauna.categories.length; ++i) {
+    fauna.treeCategoryData[fauna.categories[i].id] = [];
+  }
 
   // sigh - apparently style positions set in a css file don't appear
   // in javascript (ff), but they do appear if set in javascript.
@@ -890,7 +1178,17 @@ window.onload = function() {
 
 document.onkeydown = function(event) {
 
-  if (fauna.detailDiv.style.visibility === 'visible') {
+  if (fauna.detailDiv.style.visibility === 'visible' ||
+      fauna.treeDetailDiv.style.visibility === 'visible') {
+
+    var scrollDiv = fauna.detailAnimal;
+    var moveDetail = fauna.moveDetail;
+    var setVisible = fauna.setDetailVisible;
+    if (fauna.treeDetailDiv.style.visibility === 'visible') {
+      scrollDiv = fauna.treeDetailImages;
+      moveDetail = function() { return; };
+      setVisible = fauna.setTreeDetailVisible;
+    }
 // http://stackoverflow.com/questions/1629926/element-onkeydown-keycode-javascript
     event = event || window.event;
 // http://www.quirksmode.org/js/keys.html
@@ -898,31 +1196,31 @@ document.onkeydown = function(event) {
     var smallJump = 30;
     var bigJump = 250;
     if (charCode === 40) {
-      fauna.detailAnimal.scrollTop += smallJump;
+      scrollDiv.scrollTop += smallJump;
     }
     else if (charCode === 38) {
-      fauna.detailAnimal.scrollTop -= smallJump;
+      scrollDiv.scrollTop -= smallJump;
     }
     else if (charCode === 33) {
-      fauna.detailAnimal.scrollTop -= bigJump;
+      scrollDiv.scrollTop -= bigJump;
     }
     else if (charCode === 34) {
-      fauna.detailAnimal.scrollTop += bigJump;
+      scrollDiv.scrollTop += bigJump;
     }
     else if (charCode === 13 || charCode === 32 || charCode === 39) {
-      fauna.moveDetail('right');
+      moveDetail('right');
     }
     else if (charCode === 37) {
-      fauna.moveDetail('left');
+      moveDetail('left');
     }
     else if (charCode === 36) {
-      fauna.moveDetail('fullLeft');
+      moveDetail('fullLeft');
     }
     else if (charCode === 35) {
-      fauna.moveDetail('fullRight');
+      moveDetail('fullRight');
     }
     else if (charCode === 27 || charCode === 81) {
-      fauna.setDetailVisible(false);
+      setVisible(false);
     }
     else {
       return true;
@@ -941,19 +1239,21 @@ fauna.preloadDetailControlImages = function() {
   var fullLeft = new Image();
   fullLeft.src = 'images/fullLeft.png';
   var fullLeftOff = new Image();
-  fullLeftOff = 'images/fullLeftOff.png';
+  fullLeftOff.src = 'images/fullLeftOff.png';
   var left = new Image();
   left.src = 'images/left.png';
   var leftOff = new Image();
-  leftOff = 'images/leftOff.png';
+  leftOff.src = 'images/leftOff.png';
   var right = new Image();
   right.src = 'images/right.png';
   var rightOff = new Image();
-  rightOff = 'images/rightOff.png';
+  rightOff.src = 'images/rightOff.png';
   var fullRight = new Image();
   fullRight.src = 'images/fullRight.png';
   var fullRightOff = new Image();
-  fullRightOff = 'images/fullRightOff.png';
+  fullRightOff.src = 'images/fullRightOff.png';
+  var close = new Image();
+  close.src = 'images/close.png';
 };
 
 fauna.setDetailControlEvents = function() {
@@ -991,6 +1291,13 @@ fauna.setDetailControlEvents = function() {
     function() { fauna.detailClickDown('detailClose'); };
   detailClose.onmouseup =
     function() { fauna.detailClickUp('detailClose'); };
+  var treeDetailClose = document.getElementById('treeDetailClose');
+  treeDetailClose.onclick =
+    function() { fauna.setTreeDetailVisible(false); };
+  treeDetailClose.onmousedown =
+    function() { fauna.detailClickDown('treeDetailClose'); };
+  treeDetailClose.onmouseup =
+    function() { fauna.detailClickUp('treeDetailClose'); };
 };
 
 window.onscroll = function() {
