@@ -1,0 +1,13 @@
+These are the main files of the Pheasant Branch Conservancy fauna
+website, written on a volunteer basis by Tom Klein for the Friends of
+Pheasant Branch Conservancy in Middleton, WI (http://pheasantbranch.org/).
+
+http://pheasantbranch.org/fauna
+  index.html
+  pbc_fauna.css
+  pbc_fauna.js
+  pbc_fauna_ajax.php
+  xml_sample.xml (sample of an xml data file used to store fauna records)
+
+pbc_fauna.js and pbc_fauna_ajax.php are released under a GPL license,
+the text of which is available in the LICENSE file.

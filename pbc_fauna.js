@@ -1,3 +1,27 @@
+/* 
+   @source: https://github.com/kleintom/Pheasant-Branch-Conservancy-fauna
+   @licstart  The following is the entire license notice for the JavaScript
+   code in this page.
+
+   Copyright (C) 2013 Tom Klein
+
+   The JavaScript code in this page is free software: you can
+   redistribute it and/or modify it under the terms of the GNU
+   General Public License (GNU GPL) as published by the Free Software
+   Foundation, either version 3 of the License, or (at your option)
+   any later version.  The code is distributed WITHOUT ANY WARRANTY;
+   without even the implied warranty of MERCHANTABILITY or FITNESS
+   FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+   As additional permission under GNU GPL version 3 section 7, you
+   may distribute non-source (e.g., minimized or compacted) forms of
+   that code without the copy of the GNU GPL normally required by
+   section 4, provided you include this license notice and a URL
+   through which recipients can access the Corresponding Source.
+
+   @licend  The above is the entire license notice for the JavaScript code in
+   this page.
+*/
 var fauna = {};
 
 // Display the <data> for <category> in thumbnail format.
@@ -369,6 +393,16 @@ fauna.createAnimalDetailDiv = function(animal) {
       var parts = thisTaxon.split('@');
       var taxonTitle = parts[0];
       var taxonName = parts[1];
+      if (taxonTitle == 'nt') {
+        // some of the 'n'o 't'axon strings have "s; when we try to
+        // put them in attribute fields of xml tags for storage, php
+        // converts them to \&quot; - note the \!  Unexpected (it
+        // doesn't do the same with & -> &amp; or < -> &lt; etc.)
+        // Anyway, we (magically) receive it from php as \", so just
+        // remove the stupid \...  This issue will probably spread at
+        // some point.  Yuk
+        taxonName = taxonName.replace(/\\/g, '');
+      }
       taxonomy.push([taxonTitle, taxonName]);
     }
     fauna.addClassification(animalDiv, taxonomy);
@@ -419,7 +453,7 @@ fauna.createTreeAnimalDetailDiv = function(animal) {
     treeDetailImages.innerHTML = '';
     for (var i = 0; i < images.length; ++i) {
       var imageElt = document.createElement('img');
-      imageElt.setAttribute('src', '../fopb/public/fauna/images/' + images[i] + '.jpg');
+      imageElt.setAttribute('src', 'images/' + images[i] + '.jpg');
       treeDetailImages.appendChild(imageElt);
     }
   }
@@ -528,9 +562,9 @@ fauna.createNotesElement = function(notesTitle, notesText) {
 
 fauna.displayInstructions = function(visibile) {
 
-  var value = 'visible';
-  if (!visibile) { value = 'hidden'; }
-  document.getElementById('instructions').style.visibility = value;
+  var value = 'block';
+  if (!visibile) { value = 'none'; }
+  document.getElementById('instructions').style.display = value;
 };
 
 fauna.getSelectCount = function() {
@@ -843,7 +877,7 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
       thumbsDiv.setAttribute('id', 'th' + animalCount);
       for (var j = 0; j < images.length; ++j) {
         var imageElt = document.createElement('img');
-        imageElt.setAttribute('src', '../fopb/public/fauna/images/z' + images[j] + '.jpg');
+        imageElt.setAttribute('src', 'images/z' + images[j] + '.jpg');
         thumbsDiv.appendChild(imageElt);
       }
       animalDiv.appendChild(thumbsDiv);
@@ -896,6 +930,10 @@ fauna.loadTreeViewFromXml = function(dom) {
     parent = thisTaxon[0];
     var tagName = thisTaxon[1][2];
     var taxonName = thisTaxon[1][1];
+    if (tagName === 'nt') {
+      // see note elsewhere on 'n'o 't'axon snafu concerning "s
+      taxonName = taxonName.replace(/\\/g, '');
+    }
     var taxonXmlNode = thisTaxon[1][0];
     parent = fauna.addTreeViewDiv(tagName, taxonName, parent);
     var animalsAtThisTaxon = 
@@ -911,7 +949,18 @@ fauna.getViewType = function() {
   return document.getElementById('treeViewBox').checked ? 'tree' : 'thumb';
 };
 
+fauna.createCookie = function(days) {
+
+  var date = new Date();
+  date.setTime(date.getTime() + days*24*60*60*1000);
+  document.cookie = 'fView=tree; expires=' + date.toGMTString() +
+    '; path=/fauna';
+};
+
 fauna.setupViewMode = function(mode) {
+
+  var cookieDays = (mode === 'thumb') ? -1 : 365;
+  fauna.createCookie(cookieDays);
 
   if (!fauna.currentCategory) { return; }
 
@@ -972,7 +1021,6 @@ fauna.ajaxCategoryHandler = function(request) {
       if (fauna.checkAjaxResponse(request) === -1) {
         return;
       }
-      //alert(request.responseText);
       var dom = request.responseXML;
       var category = dom.documentElement.tagName;
       if (fauna.getViewType() === 'thumb') {
@@ -1174,6 +1222,11 @@ window.onload = function() {
   // sigh - apparently style positions set in a css file don't appear
   // in javascript (ff), but they do appear if set in javascript.
   document.getElementById("detailClose").style.top = "-47px";
+
+  // cookie to decide thumb or tree view
+  if (document.cookie.indexOf('fView') !== -1) { // tree
+    document.getElementById('treeViewBox').checked = true;
+  }
 };
 
 document.onkeydown = function(event) {
@@ -1367,6 +1420,22 @@ for (var i = 0, length = factories.length; i < length; ++i) {
 }
 if (!fauna.ajaxObject) {
   fauna.ajaxObject = fauna.error_alert;
+}
+
+// IE8 doesn't support these ... good to know
+if (!document.ELEMENT_NODE) {
+  document.ELEMENT_NODE = 1;
+  document.ATTRIBUTE_NODE = 2;
+  document.TEXT_NODE = 3;
+  document.CDATA_SECTION_NODE = 4;
+  document.ENTITY_REFERENCE_NODE = 5;
+  document.ENTITY_NODE = 6;
+  document.PROCESSING_INSTRUCTION_NODE = 7;
+  document.COMMENT_NODE = 8;
+  document.DOCUMENT_NODE = 9;
+  document.DOCUMENT_TYPE_NODE = 10;
+  document.DOCUMENT_FRAGMENT_NODE = 11;
+  document.NOTATION_NODE = 12;
 }
 
 fauna.error_alert = function(message) {
