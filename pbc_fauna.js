@@ -1,4 +1,4 @@
-/* 
+/*
    @source: https://github.com/kleintom/Pheasant-Branch-Conservancy-fauna
    @licstart  The following is the entire license notice for the JavaScript
    code in this page.
@@ -26,7 +26,7 @@ var fauna = {};
 
 // Display the <data> for <category> in thumbnail format.
 fauna.displayThumbCategory = function(category, data) {
-  
+
   // sort by common name, except put empty names at the end
   var sortFunction = function(a, b) {
     var aFirstImage = parseInt(a.images);
@@ -55,7 +55,7 @@ fauna.displayThumbCategory = function(category, data) {
   var faunaDiv = document.getElementById("thumbFauna");
   faunaDiv.innerHTML = ""; // bye bye
   for (var i = 0; i < data.length; ++i) { // for each animal
-      
+
     var thisAnimal = data[i];
     var thumbsDiv = document.createElement('div');
     thumbsDiv.setAttribute('class', 'thumbs');
@@ -96,7 +96,7 @@ fauna.displayThumbCategory = function(category, data) {
 // display of the tip, otherwise make the tip permanently visible
 fauna.createThumbTip = function(common, scientific, tipDiv,
                                 returnDisplayer) {
-  
+
   var displayText = "";
   // HACK for specail DNR prairie insect survey
   if (!returnDisplayer) {
@@ -157,7 +157,7 @@ fauna.renewClickHandlers = function() {
         var tipDiv = document.getElementById(thisId + 'nameTip');
         thumbsDiv.onmouseover = fauna.createTipDisplayFunction(tipDiv);
         thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
-      }      
+      }
     }
   }
   else { // tree view
@@ -375,7 +375,7 @@ fauna.createAnimalDetailDiv = function(animal) {
 
   var animalDiv = document.createElement('div');
   animalDiv.setAttribute('class', 'animal');
-    
+
   // title
   var titleDiv = document.createElement('div');
   titleDiv.setAttribute('class', 'title');
@@ -383,7 +383,7 @@ fauna.createAnimalDetailDiv = function(animal) {
     animal.scientific ? ' (<i>' + animal.scientific + '</i>)' : '';
   titleDiv.innerHTML = '<b>' + animal.common + scientific + '</b>';
   animalDiv.appendChild(titleDiv);
-  
+
   // taxonomy
   if (animal.taxonomy) {
     var taxonomy = [];
@@ -423,7 +423,7 @@ fauna.createAnimalDetailDiv = function(animal) {
     animalDiv.appendChild(fauna.createNotesElement('Links',
                                                    animal.links));
   }
-  
+
   // images
   var images = animal.images.split(',');
   var firstImageNumber = parseInt(images[0], 10);
@@ -636,7 +636,7 @@ fauna.loadCurrentCategoryHelper = function(faunaDivId,
     }
     else {
       fauna.loadCategory(category);
-    }  
+    }
 };
 
 // Apparently need to use a closure here since IE doesn't set "this" on
@@ -687,7 +687,7 @@ fauna.detailClickDown = function(id) {
     return;
   }
   var element = document.getElementById(id);
-  var curTop = fauna.getPositionFromStyle(element.style.top); 
+  var curTop = fauna.getPositionFromStyle(element.style.top);
   element.style.top = (curTop + 1) + "px";
 };
 
@@ -703,7 +703,7 @@ fauna.detailClickUp = function(id) {
 
 fauna.ignoreDetailClick = function(id) {
 
-  if (fauna.getViewType() === 'tree') { return false; } // don't ignore 
+  if (fauna.getViewType() === 'tree') { return false; } // don't ignore
 
   if (fauna.curDetailIndex() === 0 &&
       (id === "detailLeft" || id === "detailFullLeft")) {
@@ -751,13 +751,13 @@ fauna.createLinks = function(text, element) {
       var link = document.createElement('a');
       link.setAttribute('href', href);
       link.appendChild(document.createTextNode(hyperText));
-      element.appendChild(link);        
+      element.appendChild(link);
     }
   }
 };
 
 fauna.getData = function(xml, elementName) {
-  
+
   var element = xml.getElementsByTagName(elementName)[0];
   if (element && element.firstChild) {
     return element.firstChild.data;
@@ -805,7 +805,7 @@ fauna.addTaxaNodeListToStack = function(nodeList, stack, parent) {
   if (animalsArray.length > 0) {
     animalsArray.sort(fauna.sortByScientific);
   }
-  return animalsArray;    
+  return animalsArray;
 };
 
 fauna.loadAnimalFromXml = function(xmlAnimal) {
@@ -833,7 +833,7 @@ fauna.addTreeViewDiv = function(tagName, taxonName, parent) {
       tagName === 'o' || tagName === 'c') {
     maybeSolid = 's';
     titleClass = 'solidTitle';
-  }  
+  }
   var newTaxon = document.createElement('div');
   newTaxon.setAttribute('class', fauna.lineStyles[parent.eo()][maybeSolid]);
   var titleDiv = document.createElement('div');
@@ -906,16 +906,16 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
                                                      thisAnimal.links));
     }
     parent.obj().appendChild(animalDiv);
-  }   
+  }
 };
 
 fauna.eoObject = function(object, oldEo) {
-  
+
   var that = {};
   that.obj = function() { return object; };
   that.eo = function() { return oldEo === 'e' ? 'o' : 'e'; };
   return that;
-};  
+};
 
 fauna.loadTreeViewFromXml = function(dom) {
 
@@ -936,7 +936,7 @@ fauna.loadTreeViewFromXml = function(dom) {
     }
     var taxonXmlNode = thisTaxon[1][0];
     parent = fauna.addTreeViewDiv(tagName, taxonName, parent);
-    var animalsAtThisTaxon = 
+    var animalsAtThisTaxon =
       fauna.addTaxaNodeListToStack(taxonXmlNode.childNodes, stack, parent);
     fauna.addTreeViewAnimalDivs(animalsAtThisTaxon, parent);
   }
@@ -979,7 +979,7 @@ fauna.setupViewMode = function(mode) {
 fauna.loadAnimalsFromXML = function(dom) {
 
   var root = dom.documentElement;
-  // get us started - parents are 
+  // get us started - parents are
   // [taxon node, full-taxonomy-to-that-node] pairs
   curParents = [[root, ""]];
   animals = [];
@@ -1120,7 +1120,7 @@ fauna.heightOfElement = function(element) {
 };
 
 fauna.scrollToElement = function(element) {
-  
+
   if (element) {
 //    alert(fauna.heightOfElement(element));
     window.scrollTo(0, fauna.heightOfElement(element) - 4);
@@ -1135,7 +1135,8 @@ fauna.scrollToId = function(id) {
   }
 };
 
-fauna.categories = [{id: 'bees', title: 'Bees'},
+fauna.categories = [{id: 'ants', title: 'Ants'},
+                    {id: 'bees', title: 'Bees'},
                     {id: 'beetles', title: 'Beetles'},
                     {id: 'butterflies', title: 'Butterflies'},
                     {id: 'caterpillars', title: 'Caterpillars'},
@@ -1145,7 +1146,7 @@ fauna.categories = [{id: 'bees', title: 'Bees'},
                     {id: 'grasshoppers', title: 'Grasshoppers, katydids, and crickets'},
                     {id: 'moths', title: 'Moths'},
                     {id: 'other', title: 'Other'},
-                    {id: 'recent', title: 'Recent (added in the last 60 days)'},
+                    //{id: 'recent', title: 'Recent (added in the last 60 days)'},
                     {id: 'snakes', title: 'Snakes, frogs, turtles and toads'},
                     {id: 'spiders', title: 'Spiders'},
                     {id: 'bugs', title: 'True bugs'},
@@ -1185,7 +1186,7 @@ window.onload = function() {
      backgroundHeight + "px";
   document.selectForm1.style.top = (backgroundPadding/2) + "px";
   document.selectForm2.style.top = (backgroundPadding/2) + "px";
-  
+
   var backgroundWidth = selectWidth + backgroundPadding;
   document.getElementById('staticBackground').style.width =
     backgroundWidth + "px";
@@ -1209,6 +1210,24 @@ window.onload = function() {
   document.getElementById('treeViewBox').onclick = function() {
 
     fauna.setupViewMode(fauna.getViewType());
+  };
+
+  document.getElementById('notes_button').onclick = function() {
+
+    var button_img = document.getElementById('notes_img');
+    var contents_div = document.getElementById('notes_content');
+    var currently_collapsed =
+        button_img.getAttribute('src').lastIndexOf('up.png') === -1;
+    if (currently_collapsed) {
+      contents_div.style.display = 'block';
+      button_img.setAttribute('src', 'up.png');
+      fauna.staticSelectHeight = fauna.heightOfElement(fauna.staticSelect);
+    }
+    else {
+      contents_div.style.display = 'none';
+      button_img.setAttribute('src', 'down.png');
+      fauna.staticSelectHeight = fauna.heightOfElement(fauna.staticSelect);
+    }
   };
 
   fauna.setDetailControlEvents();
