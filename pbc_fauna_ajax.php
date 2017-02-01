@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
    @source: https://github.com/kleintom/Pheasant-Branch-Conservancy-fauna
    Copyright (C) 2013 Tom Klein
 
@@ -7,12 +7,12 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -26,7 +26,7 @@ header("Pragma: no-cache");
 $CLEAN = array();
 $CLEAN['category'] = check_value($_GET['category'],
                                  array('','caterpillars', 'butterflies',
-                                       'bugs', 'snakes', 'frogs',
+                                       'bugs', 'snakes', 'frogs', 'ants',
                                        'dragonflies', 'flies', 'recent',
                                        'spiders', 'other', 'bees', 'moths',
                                        'grasshoppers', 'beetles', 'wasps',
@@ -36,7 +36,7 @@ $CLEAN['category'] = check_value($_GET['category'],
 $dataPrefix = 'pbData/';
 
 if ($CLEAN['category']) { // return all data for category
-  
+
   $category = $CLEAN['category'];
   if ($category == 'recent') { // special case
     print getRecent();

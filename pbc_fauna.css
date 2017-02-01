@@ -1,8 +1,247 @@
+/* Currently supporting IE10+ */
+
+@media (max-width: 450px) {
+    #detailControls #detailCount {
+        display: none;
+    }
+}
+
+@media (max-width: 599px) {
+    #pageNotesContent {
+        margin: 0 8px;
+    }
+
+    #links {
+        margin: 0px;
+        padding: 4px;
+    }
+
+    #links ul {
+        margin-left: 4px;
+        margin-right: 4px;
+    }
+
+    #reportImgs {
+        display:none;
+    }
+
+    #links p {
+        margin: 0 0 0 12px;
+        text-indent: -12px;
+        padding: 4px;
+    }
+
+    #links a:first-child {
+        font-size: 1.1em;
+        margin-right: 4px;
+    }
+
+    .subLinks {
+        margin-left: 16px;
+    }
+
+    .detailDiv {
+        left: 12px;
+        right: 12px;
+    }
+
+    .taxon {
+        margin-left: 8px;
+        margin-top: 4px;
+        text-indent: -4px;
+    }
+
+    .detailImages img {
+        /* If you apply full margin, then in the case where the image
+           is scaled down and the following image wraps to the next
+           line, the image on this line overflows to the right :/ */
+        margin-bottom: 4px;
+        margin-right: 4px;
+    }
+
+    #detailAnimal p {
+        margin: 4px 16px 12px 16px;
+    }
+
+    #detailAnimal span {
+        line-height: 1.2;
+    }
+
+    .classification {
+        padding-left: 12px;
+    }
+
+    #detailControls #detailFullLeft, #detailControls #detailFullLeftOff,
+    #detailControls #detailFullRight, #detailControls #detailFullRightOff {
+        display: none;
+    }
+}
+
+@media (min-width: 600px) {
+    h1 {
+        font-size: 2.8em;
+    }
+
+    #pageNotesContent {
+        max-width: 85%;
+        margin: 0 auto;
+    }
+
+    #links {
+        margin: 0px 15px;
+        padding: 8px;
+    }
+
+    #links p {
+        margin: 0 0 0 16px;
+        text-indent: -16px;
+        padding: 2px 8px;
+    }
+
+    #links ul {
+        margin-left: 17px;
+    }
+
+    #links a:first-child {
+        font-size: 1.2em;
+        margin-right: 8px;
+    }
+
+    .subLinks {
+        margin-left: 2em;
+    }
+
+    .taxon {
+        margin-left: 2em;
+        margin-top: 4px;
+        text-indent: -1em;
+    }
+
+    #detailAnimal p {
+        margin: 4px 32px 12px 32px;
+    }
+
+    .detailImages img {
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+
+    .detailDiv {
+        left: 24px;
+        right: 24px;
+    }
+}
+
+@media (max-width: 799px) {
+    #treeFauna .evenSolid, #treeFauna .evenSoft,
+    #treeFauna .oddSolid, #treeFauna .oddSoft {
+        margin-left: 2px;
+        border-left: none;
+    }
+
+    #treeFauna {
+        margin: 0 -15px;
+    }
+
+    div.treeAnimal {
+        margin-right: 8px;
+        max-width: 100%;
+    }
+
+    .treeAnimal .title {
+        text-align: center;
+    }
+
+    div.treeThumbs {
+        display: block;
+        margin-bottom: 12px;
+    }
+}
+
+@media (min-width: 800px) and (max-width: 1199px) {
+    #treeFauna .evenSolid, #treeFauna .evenSoft,
+    #treeFauna .oddSolid, #treeFauna .oddSoft {
+        margin-left: 1em;
+    }
+}
+
 body {
     margin: 0px;
+    margin-bottom: 55px;
     padding: 0px;
-    min-width: 950px;
-    overflow: auto;
+    font-family: verdana, arial, helvetica, sans-serif;
+}
+
+select {
+    border: 1px solid black;
+}
+
+textarea {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+button {
+    margin: 10px;
+}
+
+input {
+    margin: 3px;
+}
+
+img {
+    max-width: 100%;
+    border: 2px solid #444444;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    font-style: oblique;
+    color: #2A2A2A;
+    padding: 8px;
+    font-family: georgia, 'times new roman', times, serif;
+}
+
+h1 a {
+    color: #409C46;
+    font-size: 1.3em;
+}
+
+a {
+    word-wrap: break-word;
+}
+
+#treeViewBox {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+#treeViewBoxTarget {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#treeViewBoxTarget + span {
+    /* sigh */
+    position: relative;
+    bottom: -1px;
+    left: -4px;
+}
+
+#treeViewCheckboxControl {
+    margin-bottom: 16px;
 }
 
 #fixedSelect {
@@ -12,7 +251,6 @@ body {
 }
 
 .faunaSelect {
-    margin-bottom: 16px;
     z-index: 2;
 }
 
@@ -23,9 +261,7 @@ body {
 .faunaSelectBackground {
     background: green;
     opacity: 0.1;
-    filter: alpha(opacity=10);       /* IE8 and lower */
-    /* set "zoom" to trigger "hasLayout" in IE 7 and lower */
-    zoom: 1;
+    filter: alpha(opacity=10); /* IE8 and lower */
 }
 
 .selectForm {
@@ -35,81 +271,35 @@ body {
     margin-right: auto;
 }
 
-select {
-    border: 1px solid black;
-}
-
 #treeForm p {
     margin-left: 8px;
 }
 
-textarea {
-    margin-top: 4px;
-    margin-bottom: 4px;
-}
-
-body {
-    margin: 0px;
-    margin-bottom: 55px;
-    padding: 0px;
-    font-family: georgia, 'times new roman', times, serif;
-}
-
-button {
-    margin: 10px;
-}
-
-img {
-    border: 2px solid #444444;
-    margin: 5px;
-}
-
-p {
-    clear: both;
-    margin: 8px 30px;
-    font-family: verdana, arial, helvetica, sans-serif;
-}
-
-h1 {
-    text-align: center;
-    font-size: 2.8em;
-    font-style: oblique;
-    color: #2A2A2A;
-}
-
-h1 a {
-    color: #409C46;
-    font-size: 1.3em;
-}
-
-.notes_title {
+.pageNotesTitle {
     font-size: 1.5em;
     font-weight: bold;
     margin-top: 12px;
     margin-bottom: 8px;
 }
 
-#notes_header {
+#pageNotesHeader {
     margin-left: auto;
     margin-right: auto;
     margin-top: 16px;
     text-align: center;
 }
 
-#notes_button {
+#pageNotesButton {
     font-size:1.2em;
     cursor: pointer;
 }
 
-#notes_img {
+#pageNotesImg {
     border: none;
 }
 
-#notes_content {
+#pageNotesContent {
     padding: 8px;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 85%;
     margin-bottom: 16px;
     background: #f4f4f4;
     border: 2px solid #ccc;
@@ -123,18 +313,8 @@ h1 a {
 }
 
 #links {
-    margin-top: 0px;
-    margin-left: 15px;
-    margin-right: 15px;
-    padding-bottom: 10px;
-    padding-top: 8px;
     border: 1px solid black;
     background: white;
-}
-
-#links a:first-child {
-    font-size: 1.2em;
-    margin-right: 8px;
 }
 
 #links img {
@@ -147,7 +327,6 @@ h1 a {
     text-indent: -2em;
     margin-top: 8px;
     margin-bottom: 8px;
-    margin-left: 17px;
 }
 
 #links > ul > li {
@@ -155,72 +334,67 @@ h1 a {
 }
 
 #titleImage {
-    width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    padding: 0 8px;
+    text-align: center;
 }
 
 #titleImage img {
-    width: 800px;
-    height: 254px;
     border: 2px solid black;
+    box-sizing: border-box;
 }
 
 .imageInfo {
-    width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 8px;
+    text-align: center;
     font-size: .9em;
 }
 
-#opaqueDiv {
+#screenDiv {
     visibility: hidden;
     background: black;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    min-width: 1000px;
     height: 100%;
 /*http://css-tricks.com/css-transparency-settings-for-all-broswers/*/
 	filter: alpha(opacity=65);
 	opacity: 0.65;
-    /* set "zoom" to trigger "hasLayout" in IE 7 and lower */
-    zoom: 1;
     z-index: 2;
 }
 
-#detailDiv {
-    visibility: hidden;
+.detailDiv {
     background: white;
     border: 6px solid black;
     position: absolute;
-    left: 25px;
-    right: 25px;
-    min-width: 700px;
     z-index: 3;
+}
+
+#thumbsDetailDiv {
+    visibility: hidden;
 }
 
 #treeDetailDiv {
     visibility: hidden;
-    background: white;
-    border: 6px solid black;
-    position: absolute;
-    left: 25px;
-    right: 25px;
-    min-width: 700px;
-    z-index: 3;
+    overflow: auto;
+}
+
+#treeFauna p {
+    margin: 4px 30px 12px 30px;
 }
 
 .treeThumbs {
     background: white;
     border: 1px solid #999;
-    padding: 2px;
+    padding: 3px;
     margin: 2px;
     display: inline-block;
     vertical-align: middle;
     cursor: pointer;
+    text-align: center;
+}
+
+.treeThumbs > img {
+    margin: 3px;
 }
 
 #detailAnimal {
@@ -232,34 +406,28 @@ h1 a {
 }
 
 #treeDetailImages {
-    overflow: auto;
-    position: absolute;
-    top: 52px;
-    bottom: 0px;
-    width: 100%;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding: 12px;
+    box-sizing: border-box;
 }
 
 .treeAnimal {
     background: #f1f1f1;
     margin-bottom: 4px;
-    margin-left: 32px;
-    margin-right: 12px;
     padding-bottom: 5px;
     padding-left: 2px;
     padding-top: 2px;
     padding-right: 2px;
     border: 2px solid #ccc;
-    width: 900px;
+    max-width: 900px;
 }
 
-.detailImages, #treeDetailImages {
+.detailImages {
     text-align: center;
+    display: inline-block;
 }
 
-.detailImages img, #treeDetailImages img {
-    display: inline-block;
+.detailImages img {
+    box-sizing: border-box;
 }
 
 #detailControls {
@@ -277,20 +445,28 @@ h1 a {
     display: inline-block;
 }
 
-#detailClose, #treeDetailClose {
+.detailClose {
     border: 0px;
     position: relative;
-    /*top: -47px;*/ /* see comment in js on setting this there */
     float: right;
+}
+
+#thumbsDetailClose {
+    left: -3px;
+    /*top: -42px;*/ /* See comment in js on setting this there. */
+}
+
+#treeDetailClose {
+    left: -6px;
+    /*top: 8px;*/ /* See comment in js on setting this there. */
 }
 
 #detailCount {
     position: relative;
     bottom: 6px;
     height: 42px;
-    display: inline-block;
-    width: 152px;
-    text-align: center;
+    margin-left: 24px;
+    margin-right: 24px;
     font-weight: bold;
     font-size: 36px;
 }
@@ -301,14 +477,27 @@ h1 a {
     background: white;
     border: 4px solid black;
     margin: 12px;
+    padding: 6px;
     cursor: pointer;
     position: relative;
 }
 
-.thumbs img {
-    margin: 12px;
+.thumbContainer {
+    height: 204px;
+    width: 204px;
+    position: relative;
     vertical-align: middle;
     display: inline-block;
+    margin: 6px;
+}
+
+.thumbContainer > img {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
 }
 
 #instructions {
@@ -347,12 +536,15 @@ h1 a {
 #innerWarning {
     background: white;
     margin: 2px;
-    padding: 8px;
     border: 1px solid black;
 }
 
 #innerWarning strong {
     font-size: 1.2em;
+}
+
+#innerWarning p {
+    margin: 8px;
 }
 
 .title {
@@ -361,12 +553,8 @@ h1 a {
     color: #444444;
     background: #DCDCE1;
     border: 2px solid #555555;
-    margin-left: 0px;
-    margin-right: 0px;
     margin-bottom: 8px;
-    padding-bottom: 4px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 4px 10px;
 }
 
 #treeDetailTitle {
@@ -374,13 +562,8 @@ h1 a {
     color: #444444;
     background: #DCDCE1;
     border: 2px solid #555555;
-    margin-left: 8px;
-    margin-top: 8px;
-    margin-right: 52px;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin: 8px 52px 8px 8px;
+    padding: 4px 10px;
 }
 
 .title b {
@@ -389,7 +572,6 @@ h1 a {
 
 #faunaDiv {
     padding: 0px 15px;
-    min-width: 700px;
     display: none;
 }
 
@@ -397,17 +579,31 @@ h1 a {
     position: relative;
     margin-left: -10px;
     margin-right: -10px;
-    /* apparently relative position elements z-index-compete with fixed
-       elements - this one needs to stay below the fixed position select */
+    /* Apparently relative position elements z-index-compete with fixed
+       elements - this one needs to stay below the fixed position select. */
     z-index: -1;
+    font-size: 2em;
+    color: #461F00;
+    background: #D8DDEB;
+    border: 3px solid #6161FF;
+}
+
+#faunaTitleLoadingWrapper {
+    display: inline-block;
+    position: relative;
+}
+
+#faunaTitle {
+    margin: 0px;
+    padding: 4px 40px 4px 6px;
+    display: inline-block;
 }
 
 #faunaLoading {
     position: absolute;
+    right: 14px;
     top: 8px;
-    right: 10px;
-    color: #888888;
-    padding: 8px;
+    font-size: .8em;
 }
 
 #thumbFauna {
@@ -416,15 +612,7 @@ h1 a {
     border-left: 2px solid #dddddd;
     border-right: 2px solid #dddddd;
     border-bottom: 2px solid #dddddd;
-}
-
-#faunaTitle {
-    font-size: 2em;
-    color: #461F00;
-    background: #D8DDEB;
-    margin: 0px;
-    padding: 0px 6px 8px 6px;
-    border: 3px solid #6161FF;
+    text-align: center;
 }
 
 .submissionTitle {
@@ -484,10 +672,6 @@ h1 a {
     border: 1px solid blue;
 }
 
-input {
-    margin: 3px;
-}
-
 .submissions {
     clear: both;
 }
@@ -532,10 +716,6 @@ input {
     margin-bottom: 8px;
 }
 
-.taxon {
-    margin-left: 2em;
-}
-
 .taxonTitle {
     color: #777;
 }
@@ -562,7 +742,6 @@ input {
 
 .treeTaxonTitleDiv {
     position: relative;
-    left: -20px;
     background: white;
     padding: 4px;
 }

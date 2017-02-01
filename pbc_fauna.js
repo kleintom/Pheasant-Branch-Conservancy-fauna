@@ -27,14 +27,16 @@ var fauna = {};
 // Display the <data> for <category> in thumbnail format.
 fauna.displayThumbCategory = function(category, data) {
 
-  // sort by common name, except put empty names at the end
+  // Sort by common name, except put empty names at the end.
   var sortFunction = function(a, b) {
     var aFirstImage = parseInt(a.images);
     var bFirstImage = parseInt(b.images);
-    if (aFirstImage >= 100 && bFirstImage < 100) {
+    if (aFirstImage >= fauna.imageCutoff &&
+        bFirstImage < fauna.imageCutoff) {
       return -1;
     }
-    else if (aFirstImage < 100 && bFirstImage >= 100) {
+    else if (aFirstImage < fauna.imageCutoff &&
+             bFirstImage >= fauna.imageCutoff) {
       return 1;
     }
     if (a.common === '' && b.common === '') {
@@ -49,12 +51,13 @@ fauna.displayThumbCategory = function(category, data) {
     return b.common < a.common ? 1 : -1;
   }
   data = data.sort(sortFunction);
-  fauna.thumbCategoryData[category] = data; // save for detail requests
+  fauna.thumbCategoryData[category] = data; // Save for use by detail requests.
   fauna.currentCategory = category;
 
   var faunaDiv = document.getElementById("thumbFauna");
-  faunaDiv.innerHTML = ""; // bye bye
-  for (var i = 0; i < data.length; ++i) { // for each animal
+  faunaDiv.innerHTML = "";
+  var thumbsFragment = document.createDocumentFragment();
+  for (var i = 0; i < data.length; ++i) { // For each animal.
 
     var thisAnimal = data[i];
     var thumbsDiv = document.createElement('div');
@@ -63,12 +66,13 @@ fauna.displayThumbCategory = function(category, data) {
     thumbsDiv.onclick = fauna.createDetailClickHandler(i);
     var tipDiv = document.createElement('div');
     var images = thisAnimal.images.split(',');
-    if (images[0] < 100) { // special category; make tip always visible
+    if (images[0] < fauna.imageCutoff) {
+      // Special category; make the tooltip always visible.
       tipDiv.setAttribute('class', 'nameTipOn');
       fauna.createThumbTip(thisAnimal.common, thisAnimal.scientific,
                            tipDiv, false);
       thumbsDiv.style.width = "200px";
-      // no images
+      // No images.
     }
     else {
       tipDiv.setAttribute('class', 'nameTip');
@@ -77,28 +81,32 @@ fauna.displayThumbCategory = function(category, data) {
                                                    thisAnimal.scientific,
                                                    tipDiv, true);
       thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
-      // images
+      // Images.
       for (var j = 0; j < images.length; ++j) {
+        var thumbContainer = document.createElement('div');
+        thumbContainer.setAttribute('class', 'thumbContainer');
         var imageElt = document.createElement('img');
         imageElt.setAttribute('src', 'images/z' + images[j] + '.jpg');
-        thumbsDiv.appendChild(imageElt);
+        thumbContainer.appendChild(imageElt);
+        thumbsDiv.appendChild(thumbContainer);
       }
     }
     thumbsDiv.appendChild(tipDiv);
-    faunaDiv.appendChild(thumbsDiv);
+    thumbsFragment.appendChild(thumbsDiv);
   }
+  faunaDiv.appendChild(thumbsFragment);
   fauna.thumbCategoryHTML[category] = faunaDiv.innerHTML;
   fauna.scrollToId("instructions");
 };
 
 // Populate <tipDiv> with <common> and <scientific> display text; if
 // <returnDisplayer> is true then return a function that schedules
-// display of the tip, otherwise make the tip permanently visible
+// display of the tip, otherwise make the tip permanently visible.
 fauna.createThumbTip = function(common, scientific, tipDiv,
                                 returnDisplayer) {
 
   var displayText = "";
-  // HACK for specail DNR prairie insect survey
+  // Hack for special DNR prairie insect survey.
   if (!returnDisplayer) {
     displayText = "<strong>WI DNR Prairie Insect Survey:</strong> ";
   }
@@ -145,13 +153,13 @@ fauna.renewClickHandlers = function() {
 
   if (fauna.getViewType() === 'thumb') {
     var data = fauna.thumbCategoryData[fauna.currentCategory];
-    for (var i = 0; i < data.length; ++i) { // for each animal
+    for (var i = 0; i < data.length; ++i) { // For each animal.
       var thisAnimal = data[i];
       var thumbsDiv = document.getElementById(thisAnimal.id);
       thumbsDiv.onclick = fauna.createDetailClickHandler(i);
-      // renew the tip handlers
+      // Renew the tip handlers.
       var  images = thisAnimal.images.split(',');
-      if (images[0] >= 100) { // needs a tip handler
+      if (images[0] >= fauna.imageCutoff) { // These need a tip handler.
         var thisId = thisAnimal.id;
         var thumbsDiv = document.getElementById(thisId);
         var tipDiv = document.getElementById(thisId + 'nameTip');
@@ -160,9 +168,9 @@ fauna.renewClickHandlers = function() {
       }
     }
   }
-  else { // tree view
+  else { // Tree view.
     var data = fauna.treeCategoryData[fauna.currentCategory];
-    for (var i = 0; i < data.length; ++i) { // for each animal
+    for (var i = 0; i < data.length; ++i) { // For each animal.
       var thisAnimal = data[i];
       var thumbsDiv = document.getElementById('th' + i);
       thumbsDiv.onclick = fauna.createTreeThumbsClickHandler(i);
@@ -178,14 +186,14 @@ fauna.categoryLength = function() {
 // Update the detail controls based on the current detail index.
 fauna.updateDetailControls = function() {
 
-  var curIndex = fauna.curDetailIndex(); // 0-based
+  var curIndex = fauna.curDetailIndex(); // 0-based.
   var maxIndex = fauna.categoryLength() - 1;
-  // detail can change from any one index to any other, so need to
-  // check all cases each time
+  // Detail can change from any one index to any other, so need to
+  // check all cases each time.
   if (curIndex === 0) {
     var left = document.getElementById('detailLeft');
     left.style.cursor = "default";
-    // do I need to set size again, even though it's the same as the
+    // Do I need to set size again, even though it's the same as the
     // previous src?  Probably...
     left.src = "images/leftOff.png";
     var fullLeft = document.getElementById('detailFullLeft');
@@ -228,20 +236,20 @@ fauna.updateDetailControls = function() {
   }
 };
 
-// Input is the index (0-based!) of the animal in the current category
+// Input is the (0-based!) index of the animal in the current category
 // to create the detail for.
 fauna.createDetailClickHandler = function(i) {
 
   return function() {
     fauna.loadDetailAnimal(i);
     fauna.updateDetailControls();
-    fauna.setDetailVisible(true);
+    fauna.setThumbsDetailVisible(true);
     fauna.preloadImages(i - 1);
     fauna.preloadImages(i + 1);
   };
 };
 
-// Load animal with <index> (0-based!) in the detail div, removing any
+// Load animal with (0-based!) <index> in the detail div, removing any
 // previous animal.
 fauna.loadDetailAnimal = function(index) {
 
@@ -251,7 +259,7 @@ fauna.loadDetailAnimal = function(index) {
   fauna.setDisplayedIndex(index + 1);
 };
 
-// Input is the index (0-based!) of the animal in the current category
+// Input is the (0-based!) index of the animal in the current category
 // to create the detail for.
 fauna.createTreeThumbsClickHandler = function(i) {
 
@@ -261,7 +269,7 @@ fauna.createTreeThumbsClickHandler = function(i) {
   };
 };
 
-// Load animal with <index> (0-based!) in the tree detail div, removing any
+// Load animal with (0-based!) <index> in the tree detail div, removing any
 // previous animal.
 fauna.loadTreeDetailAnimal = function(index) {
 
@@ -269,7 +277,7 @@ fauna.loadTreeDetailAnimal = function(index) {
   fauna.createTreeAnimalDetailDiv(animal);
 };
 
-// Display the <index> (1-based!) of the detail animal in the detail
+// Display the (1-based!) <index> of the detail animal in the detail
 // control bar.
 fauna.setDisplayedIndex = function(index) {
 
@@ -282,7 +290,7 @@ fauna.setDisplayedIndex = function(index) {
   fauna.detailCount.innerHTML = index + "/" + maxCount;
 };
 
-// Return the current detail index (0-based!)
+// Return the current detail index (0-based!).
 fauna.curDetailIndex = function() {
 
   var indexText = fauna.detailCount.innerHTML;
@@ -292,7 +300,7 @@ fauna.curDetailIndex = function() {
 // Move the detail index as specified by <where>.
 fauna.moveDetail = function(where) {
 
-  var newIndex = 0; // 0-based
+  var newIndex = 0; // 0-based.
   if (where === "fullLeft") {
     newIndex = 0;
     fauna.preloadImages(1);
@@ -319,8 +327,8 @@ fauna.moveDetail = function(where) {
   fauna.updateDetailControls();
 };
 
-// Preload the images for the animal at index <index>
-// (0-based!) in the current category.
+// Preload the images for the animal at (0-based!) index <index> in the current
+// category.
 fauna.preloadImages = function(index) {
 
   if (index < 0 || index >= fauna.categoryLength()) {
@@ -329,7 +337,7 @@ fauna.preloadImages = function(index) {
   var animal = fauna.thumbCategoryData[fauna.currentCategory][index];
   var images = animal.images.split(',');
   // There's some indication online that individual img objects are
-  // necessary to actually preload multiple images
+  // necessary to actually preload multiple images.
   var imageRefs = [];
   for (var i = 0; i < images.length; ++i) {
     imageRefs[i] = new Image();
@@ -338,10 +346,10 @@ fauna.preloadImages = function(index) {
 };
 
 // Make the detail div visible if <visible> is true, else hide it.
-fauna.setDetailVisible = function(visible) {
+fauna.setThumbsDetailVisible = function(visible) {
 
-  fauna.setDetailVisibilityOnDiv(fauna.detailDiv, visible);
-  // make sure the thumb tool tip is hidden either way
+  fauna.setDetailVisibilityOnDiv(fauna.thumbsDetailDiv, visible);
+  // Make sure the thumb tool tip is hidden either way.
   fauna.cancelThumbTip();
 };
 
@@ -354,18 +362,21 @@ fauna.setTreeDetailVisible = function(visible) {
 fauna.setDetailVisibilityOnDiv = function(detailDiv, visible) {
 
   if (visible) {
-    // disable scrolling on main window
-    // NOTE that keyboard scrolling is still active
+    // Disable scrolling on main window.
+    // NOTE that keyboard scrolling is still active.
     document.body.style.overflowY= 'hidden';
-    detailDiv.style.top = fauna.pageYOffset() + 16 + "px";
-    detailDiv.style.height = fauna.windowHeight() - 50 + "px";
-    fauna.opaqueDiv.style.visibility = 'visible';
+    var windowWidth = fauna.windowWidth();
+    var topOffset = 8;
+    var heightOffset = -28;
+    detailDiv.style.top = fauna.pageYOffset() + topOffset + "px";
+    detailDiv.style.height = fauna.windowHeight() + heightOffset + "px";
+    fauna.screenDiv.style.visibility = 'visible';
     detailDiv.style.visibility = 'visible';
   }
   else {
-    fauna.opaqueDiv.style.visibility = 'hidden';
+    fauna.screenDiv.style.visibility = 'hidden';
     detailDiv.style.visibility = 'hidden';
-    // enable scrolling on main window
+    // Enable scrolling on main window.
     document.body.style.overflowY= 'visible';
   }
 };
@@ -376,7 +387,7 @@ fauna.createAnimalDetailDiv = function(animal) {
   var animalDiv = document.createElement('div');
   animalDiv.setAttribute('class', 'animal');
 
-  // title
+  // Title.
   var titleDiv = document.createElement('div');
   titleDiv.setAttribute('class', 'title');
   var scientific =
@@ -384,7 +395,7 @@ fauna.createAnimalDetailDiv = function(animal) {
   titleDiv.innerHTML = '<b>' + animal.common + scientific + '</b>';
   animalDiv.appendChild(titleDiv);
 
-  // taxonomy
+  // Taxonomy.
   if (animal.taxonomy) {
     var taxonomy = [];
     var taxons = animal.taxonomy.split('!');
@@ -394,13 +405,13 @@ fauna.createAnimalDetailDiv = function(animal) {
       var taxonTitle = parts[0];
       var taxonName = parts[1];
       if (taxonTitle == 'nt') {
-        // some of the 'n'o 't'axon strings have "s; when we try to
+        // Some of the 'n'o 't'axon strings have "s; when we try to
         // put them in attribute fields of xml tags for storage, php
         // converts them to \&quot; - note the \!  Unexpected (it
         // doesn't do the same with & -> &amp; or < -> &lt; etc.)
         // Anyway, we (magically) receive it from php as \", so just
         // remove the stupid \...  This issue will probably spread at
-        // some point.  Yuk
+        // some point.  Yuk.
         taxonName = taxonName.replace(/\\/g, '');
       }
       taxonomy.push([taxonTitle, taxonName]);
@@ -408,26 +419,27 @@ fauna.createAnimalDetailDiv = function(animal) {
     fauna.addClassification(animalDiv, taxonomy);
   }
 
-  // history
+  // History.
   if (animal.history) {
     animalDiv.appendChild(fauna.createNotesElement('Life history and ecology',
                                                    animal.history));
   }
-  // id info
+  // Id info.
   if (animal.identification) {
     animalDiv.appendChild(fauna.createNotesElement('Identification Notes',
                                                    animal.identification));
   }
-  // links
+  // Links.
   if (animal.links) {
     animalDiv.appendChild(fauna.createNotesElement('Links',
-                                                   animal.links));
+                                                   animal.links,
+                                                   'detailLinks'));
   }
 
-  // images
+  // Images.
   var images = animal.images.split(',');
   var firstImageNumber = parseInt(images[0], 10);
-  if (firstImageNumber > 100) { // image numbers < 100 are special category
+  if (firstImageNumber > fauna.imageCutoff) {
     var imagesDiv = document.createElement('div');
     imagesDiv.setAttribute('class', 'detailImages');
     for (var j = 0; j < images.length; ++j) {
@@ -440,16 +452,16 @@ fauna.createAnimalDetailDiv = function(animal) {
   return animalDiv;
 };
 
-// fill in the treeDetailDiv with this animal's info
+// Fill in the treeDetailDiv with this animal's info.
 fauna.createTreeAnimalDetailDiv = function(animal) {
 
-  // title
+  // Title.
   fauna.treeDetailTitle.innerHTML = '<b><i>' + animal.scientific +
-    '</i>&nbsp;&nbsp;--&nbsp;&nbsp;' + animal.common + '</b>';
+    '</i> -- ' + animal.common + '</b>';
 
-  // images
+  // Images.
   var images = animal.images.split(',');
-  if (images[0] > 100) { // image numbers < 100 are special category
+  if (images[0] > fauna.imageCutoff) {
     treeDetailImages.innerHTML = '';
     for (var i = 0; i < images.length; ++i) {
       var imageElt = document.createElement('img');
@@ -478,7 +490,7 @@ fauna.taxonTitles['s'] = "Species";
 fauna.taxonTitles['ss'] = "Subspecies";
 fauna.taxonTitles['nt'] = "No Taxon";
 
-// Append data from taxonomyList to parentElement
+// Append data from taxonomyList to parentElement.
 fauna.addClassification = function(parentElement, taxonomyList) {
 
   var container = document.createElement('div');
@@ -486,12 +498,12 @@ fauna.addClassification = function(parentElement, taxonomyList) {
   titleDiv.setAttribute('class', 'notesTitle');
   titleDiv.appendChild(document.createTextNode('Classification'));
   container.appendChild(titleDiv);
-  // do what bugguide does (css-wise)
+  // Do what bugguide does (css-wise).
   var taxDiv = document.createElement('div');
   taxDiv.setAttribute('class', 'classification');
   var parentDiv = taxDiv;
-  var genus = ''; // remember genus when species comes around
-  var species = ''; // remember species when subspecies comes around
+  var genus = ''; // Remember genus when species comes around.
+  var species = ''; // Remember species when subspecies comes around.
   for (var i = 0; i < taxonomyList.length; ++i) {
     var taxonTitle = taxonomyList[i][0];
     var taxonName = taxonomyList[i][1];
@@ -505,13 +517,13 @@ fauna.addClassification = function(parentElement, taxonomyList) {
     thisTaxonDiv.appendChild(titleSpan);
 
     var nameSpan = document.createElement('span');
-    if (taxonTitle == 'g') { // genus
+    if (taxonTitle == 'g') { // Genus.
       genus = taxonName;
       var italics = document.createElement('i');
       italics.appendChild(document.createTextNode(taxonName));
       nameSpan.appendChild(italics);
     }
-    else if (taxonTitle == 's') { // species
+    else if (taxonTitle == 's') { // Species.
       species = taxonName;
       var italics = document.createElement('i');
       italics.appendChild(document.createTextNode(taxonName));
@@ -519,7 +531,7 @@ fauna.addClassification = function(parentElement, taxonomyList) {
       var fullName = ' (' + genus + ' ' + taxonName + ')';
       nameSpan.appendChild(document.createTextNode(fullName));
     }
-    else if (taxonTitle == 'ss') { // subspecies
+    else if (taxonTitle == 'ss') { // Subspecies.
       var italics = document.createElement('i');
       italics.appendChild(document.createTextNode(taxonName));
       nameSpan.appendChild(italics);
@@ -540,9 +552,12 @@ fauna.addClassification = function(parentElement, taxonomyList) {
 
 // Create a div to display <notesText> in a paragraph with a title
 // <notesTitle>.
-fauna.createNotesElement = function(notesTitle, notesText) {
+fauna.createNotesElement = function(notesTitle, notesText, notesClass) {
 
   var notesDiv = document.createElement('div');
+  if (notesClass) {
+    notesDiv.setAttribute('class', notesClass);
+  }
   var titleDiv = document.createElement('div');
   titleDiv.setAttribute('class', 'notesTitle');
   titleDiv.appendChild(document.createTextNode(notesTitle));
@@ -550,7 +565,7 @@ fauna.createNotesElement = function(notesTitle, notesText) {
   var notesParagraph = document.createElement('p');
   notesDiv.appendChild(notesParagraph);
   notesText = notesText.replace(/&quot;/g, '"');
-  // replace \n with <br />
+  // Replace \n with <br />.
   var lines = notesText.split("\n");
   for (var i = 0; i < lines.length - 1; ++i) {
     fauna.createLinks(lines[i], notesParagraph);
@@ -613,10 +628,10 @@ fauna.loadCurrentCategory = function() {
                                     fauna.thumbCategoryHTML[category],
                                     'instructions');
   }
-  else { // tree view
+  else { // Tree view.
     fauna.loadCurrentCategoryHelper('treeFauna', false, category,
                                     fauna.treeCategoryHTML[category],
-                                    'treeForm');
+                                    'treeViewBox');
   }
 };
 
@@ -625,22 +640,23 @@ fauna.loadCurrentCategoryHelper = function(faunaDivId,
                                            category,
                                            categoryHTML,
                                            idToScrollTo) {
-    // bye bye to the previous category
-    document.getElementById(faunaDivId).innerHTML = "";
-    fauna.displayInstructions(maybeDisplayInstructions);
-    if (categoryHTML) {
-      document.getElementById(faunaDivId).innerHTML = categoryHTML;
-      fauna.renewClickHandlers();
-      fauna.removeLoading();
-      fauna.scrollToId(idToScrollTo);
-    }
-    else {
-      fauna.loadCategory(category);
-    }
+
+  var faunaDiv = document.getElementById(faunaDivId);
+  faunaDiv.innerHTML = "";
+  fauna.displayInstructions(maybeDisplayInstructions);
+  if (categoryHTML) {
+    faunaDiv.innerHTML = categoryHTML;
+    fauna.renewClickHandlers();
+    fauna.removeLoading();
+    fauna.scrollToId(idToScrollTo);
+  }
+  else {
+    fauna.loadCategory(category);
+  }
 };
 
 // Apparently need to use a closure here since IE doesn't set "this" on
-// event handlers
+// event handlers.
 fauna.selectChanged = function(select) {
 
   return function() {
@@ -662,13 +678,13 @@ fauna.selectChanged = function(select) {
 fauna.setVisible = function() {
 
   document.getElementById("faunaDiv").style.display = "block";
-  // never do this again
+  // Now never do this again.
   fauna.setVisible = function() {};
 };
 
-// Input is the string the browser provides for a style position
-// property.  Return the position in px if the input was in px,
-// othwerwise (either already 0 or bad news) return 0.
+// Input is the string the browser provides for a style position property.
+// Return the position in px if the input was in px, othwerwise (either already
+// 0 or bad news) return 0.
 fauna.getPositionFromStyle = function(positionString) {
 
   if (positionString == "" ||
@@ -681,6 +697,9 @@ fauna.getPositionFromStyle = function(positionString) {
 };
 
 // "React" to a mouse down click on one of the detail control "button"s.
+// TODO: This is buggy: if you click down here, but then click up off this image
+// then we never do the click up reset.  On touchscreen if you long click here
+// then we do the click down but never get the click up.
 fauna.detailClickDown = function(id) {
 
   if (fauna.ignoreDetailClick(id)) {
@@ -703,7 +722,7 @@ fauna.detailClickUp = function(id) {
 
 fauna.ignoreDetailClick = function(id) {
 
-  if (fauna.getViewType() === 'tree') { return false; } // don't ignore
+  if (fauna.getViewType() === 'tree') { return false; } // Don't ignore.
 
   if (fauna.curDetailIndex() === 0 &&
       (id === "detailLeft" || id === "detailFullLeft")) {
@@ -728,7 +747,7 @@ fauna.getCategoryTitle = function(category) {
 
 fauna.createLinks = function(text, element) {
 
-  // replace http://'s with links
+  // Replace http://'s with links.
   var parts = text.split(/(http[s]?:[^ )]+|<a href="[^"]+">[^<]+<\/a>)/);
   for (var i = 0; i < parts.length; i = i + 2) {
     var text = parts[i];
@@ -740,10 +759,10 @@ fauna.createLinks = function(text, element) {
         href = linkText;
         hyperText = linkText;
       }
-      else { // change '<a href...' markup into actual link
+      else { // Change '<a href...' markup into actual link.
         // linkText is of the form
         // <a href="plant1,plant2,...">text text...</a>
-        // where the plant names are plant codes as used on the pbc_plant site
+        // where the plant names are plant codes as used on the pbc_plant site.
         var results = linkText.match(/<a href="([^"]+)">(.+)</);
         href = 'http://pheasantbranch.org/flora/pbc_plant.php?plant=' + results[1];
         hyperText = results[2];
@@ -776,24 +795,24 @@ fauna.sortByScientific = function(a, b) {
 // nodeList is added to stack in reverse alpha order; parent is the
 // html div parent for the nodes in nodeList.  Returns an ordered list
 // of animal data objects for the nodes in nodeList that were actual
-// animal entries (not just taxon entries)
+// animal entries (not just taxon entries).
 fauna.addTaxaNodeListToStack = function(nodeList, stack, parent) {
 
-  // only taxa get added to the stack
+  // Only taxa get added to the stack.
   var taxonArray = [];
-  // actual animal entries get returned separately
+  // Actual animal entries get returned separately.
   var animalsArray = [];
   var tagName = "";
   for (var i = 0; i < nodeList.length; ++i) {
     var thisItem = nodeList[i];
     var thisTagName = thisItem.tagName;
-    if (thisTagName !== 'z') { // taxon entry
+    if (thisTagName !== 'z') { // Taxon entry.
       var taxonName = thisItem.getAttribute('t');
-      // (note: it's not necessarily true that all non-<z> children have
-      // the same tagName, so need to remember each one)
+      // (Note: it's not necessarily true that all non-<z> children have
+      // the same tagName, so need to remember each one.)
       taxonArray.push([thisItem, taxonName, thisTagName]);
     }
-    else { // animal entry
+    else { // Animal entry.
       animalsArray.push(fauna.loadAnimalFromXml(thisItem));
     }
   }
@@ -860,28 +879,31 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
     var thisAnimal = animals[i];
     var animalDiv = document.createElement('div');
     animalDiv.setAttribute('class', 'treeAnimal');
-    //// title
+    //// Title.
     var titleDiv = document.createElement('div');
     titleDiv.setAttribute('class', 'title');
     titleDiv.innerHTML = '<b><i>' + thisAnimal.scientific +
-      '</i>&nbsp;&nbsp;--&nbsp;&nbsp;' + thisAnimal.common + '</b>';
+      '</i> -- ' + thisAnimal.common + '</b>';
     animalDiv.appendChild(titleDiv);
-    //// images
+    //// Images.
     var images = thisAnimal.images.split(',');
-    // the number of animals added to this category prior to this one
-    // = future index of this animal in categoryData (see below)
+    // The number of animals added to this category prior to this one
+    // = future index of this animal in categoryData (see below).
     var animalCount = categoryData.length;
-    if (images[0] >= 100) { // < 100 is special category stuff
+    if (images[0] >= fauna.imageCutoff) {
       var thumbsDiv = document.createElement('div');
       thumbsDiv.setAttribute('class', 'treeThumbs');
       thumbsDiv.setAttribute('id', 'th' + animalCount);
       for (var j = 0; j < images.length; ++j) {
+        var thumbContainer = document.createElement('div');
+        thumbContainer.setAttribute('class', 'thumbContainer');
         var imageElt = document.createElement('img');
         imageElt.setAttribute('src', 'images/z' + images[j] + '.jpg');
-        thumbsDiv.appendChild(imageElt);
+        thumbContainer.appendChild(imageElt);
+        thumbsDiv.appendChild(thumbContainer);
       }
       animalDiv.appendChild(thumbsDiv);
-      // remember this animal for the next time this category is loaded
+      // Remember this animal for the next time this category is loaded.
       var shortAnimal = {};
       shortAnimal.id = thisAnimal.id;
       shortAnimal.images = thisAnimal.images;
@@ -890,17 +912,17 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
       categoryData.push(shortAnimal);
       thumbsDiv.onclick = fauna.createTreeThumbsClickHandler(animalCount);
     }
-    // history
+    // History.
     if (thisAnimal.history) {
       animalDiv.appendChild(fauna.createNotesElement('Life history and ecology',
                                                      thisAnimal.history));
     }
-    // id info
+    // Id info.
     if (thisAnimal.identification) {
       animalDiv.appendChild(fauna.createNotesElement('Identification Notes',
                                                      thisAnimal.identification));
     }
-    // links
+    // Links.
     if (thisAnimal.links) {
       animalDiv.appendChild(fauna.createNotesElement('Links',
                                                      thisAnimal.links));
@@ -909,18 +931,19 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
   }
 };
 
+// Keeps track of an object and a choice of 'e'ven or 'o'dd.
 fauna.eoObject = function(object, oldEo) {
 
-  var that = {};
-  that.obj = function() { return object; };
-  that.eo = function() { return oldEo === 'e' ? 'o' : 'e'; };
-  return that;
+  return {
+    obj: function() { return object; },
+    eo: function() { return oldEo === 'e' ? 'o' : 'e'; }
+  };
 };
 
 fauna.loadTreeViewFromXml = function(dom) {
 
   var root = dom.documentElement;
-  var classes = root.childNodes; // taxonomy classes, not CS classes
+  var classes = root.childNodes; // Taxonomy classes, not CS classes.
   var faunaDiv = document.getElementById("treeFauna");
   var parent = fauna.eoObject(faunaDiv, 'e');
   var stack = [];
@@ -931,7 +954,7 @@ fauna.loadTreeViewFromXml = function(dom) {
     var tagName = thisTaxon[1][2];
     var taxonName = thisTaxon[1][1];
     if (tagName === 'nt') {
-      // see note elsewhere on 'n'o 't'axon snafu concerning "s
+      // See note elsewhere on 'n'o 't'axon snafu concerning "s.
       taxonName = taxonName.replace(/\\/g, '');
     }
     var taxonXmlNode = thisTaxon[1][0];
@@ -941,7 +964,7 @@ fauna.loadTreeViewFromXml = function(dom) {
     fauna.addTreeViewAnimalDivs(animalsAtThisTaxon, parent);
   }
   fauna.treeCategoryHTML[fauna.currentCategory] = faunaDiv.innerHTML;
-  fauna.scrollToId("treeForm");
+  fauna.scrollToId("treeViewBox");
 };
 
 fauna.getViewType = function() {
@@ -965,12 +988,12 @@ fauna.setupViewMode = function(mode) {
   if (!fauna.currentCategory) { return; }
 
   if (mode === 'thumb') {
-    // hide the tree view
+    // Hide the tree view.
     document.getElementById('treeFauna').innerHTML = '';
     fauna.loadCurrentCategory();
   }
   else {
-    // hide the thumb view
+    // Hide the thumb view.
     document.getElementById('thumbFauna').innerHTML = '';
     fauna.loadCurrentCategory();
   }
@@ -979,12 +1002,12 @@ fauna.setupViewMode = function(mode) {
 fauna.loadAnimalsFromXML = function(dom) {
 
   var root = dom.documentElement;
-  // get us started - parents are
-  // [taxon node, full-taxonomy-to-that-node] pairs
+  // Get us started - parents are
+  // [taxon node, full-taxonomy-to-that-node] pairs.
   curParents = [[root, ""]];
   animals = [];
   while (curParents.length > 0) {
-    // process the current nodes
+    // Process the current nodes.
     var childNodes = [];
     for (var i = 0; i < curParents.length; ++i) {
       var thisNode = curParents[i][0];
@@ -993,13 +1016,13 @@ fauna.loadAnimalsFromXML = function(dom) {
       while (child) {
         if (child.nodeType == document.ELEMENT_NODE) {
           var tagName = child.tagName;
-          if (tagName != 'z') { // another taxon level
+          if (tagName != 'z') { // Another taxon level.
             var taxonName = child.getAttribute('t');
             childNodes.push([child, taxonParent + tagName + '@' + taxonName + '!']);
           }
-          else { // an animal
+          else { // An animal.
             var animalObject = fauna.loadAnimalFromXml(child);
-            // remove the trailing ! on taxonParent
+            // Remove the trailing ! on taxonParent.
             animalObject.taxonomy =
               taxonParent.substring(0, taxonParent.length - 1);
             animals.push(animalObject);
@@ -1091,6 +1114,7 @@ fauna.loadingFunction = function(element) {
 
   return function() {
     var old = element.innerHTML;
+
     if (old === '/') {
       cur = '&ndash;';
     }
@@ -1122,7 +1146,6 @@ fauna.heightOfElement = function(element) {
 fauna.scrollToElement = function(element) {
 
   if (element) {
-//    alert(fauna.heightOfElement(element));
     window.scrollTo(0, fauna.heightOfElement(element) - 4);
   }
 };
@@ -1152,21 +1175,25 @@ fauna.categories = [{id: 'ants', title: 'Ants'},
                     {id: 'bugs', title: 'True bugs'},
                     {id: 'wasps', title: 'Wasps'}];
 
-// we remember the innerHTML of categories that have already been loaded
+// We remember the innerHTML of categories that have already been loaded.
 fauna.thumbCategoryHTML = {};
 fauna.treeCategoryHTML = {};
-// an array of animal data for each category
+// An array of animal data for each category.
 fauna.thumbCategoryData = {};
 fauna.treeCategoryData = {};
-// remember the current category (as a string)
+// Remember the current category (as a string).
 fauna.currentCategory = "";
-// timer id for the thumb images "tool tip"
+// Timer id for the thumb images "tool tip".
 fauna.thumbTimerId = 0;
+// As hack, we use low assigned image numbers to indicate that certain entries
+// should be displayed as WDNR survey entries (which don't themselves come
+// with images).
+fauna.imageCutoff = 100;
 
 window.onload = function() {
 
-  fauna.loadingTimerId = -1; // remember the timer id for the "loading" span
-  fauna.scrollIsHigh = true; // true if we're showing the static select
+  fauna.loadingTimerId = -1; // Remember the timer id for the "loading" span.
+  fauna.scrollIsHigh = true; // true if we're showing the static select.
 
   var staticSelect = fauna.createSelect();
   document.getElementById('staticHolder').appendChild(staticSelect);
@@ -1199,23 +1226,31 @@ window.onload = function() {
   fauna.staticSelectHeight = fauna.heightOfElement(fauna.staticSelect);
   fauna.fixedSelect = document.getElementById('fixedSelect');
 
-  fauna.detailDiv = document.getElementById('detailDiv');
+  fauna.thumbsDetailDiv = document.getElementById('thumbsDetailDiv');
   fauna.treeDetailDiv = document.getElementById('treeDetailDiv');
   fauna.treeDetailTitle = document.getElementById('treeDetailTitle');
   fauna.detailAnimal = document.getElementById('detailAnimal');
   fauna.treeDetailImages = document.getElementById('treeDetailImages');
   fauna.detailCount = document.getElementById('detailCount');
-  fauna.opaqueDiv = document.getElementById('opaqueDiv');
+  fauna.screenDiv = document.getElementById('screenDiv');
 
-  document.getElementById('treeViewBox').onclick = function() {
+  document.getElementById('treeViewBox').onclick = function(event) {
 
     fauna.setupViewMode(fauna.getViewType());
+    event.stopPropagation();
   };
 
-  document.getElementById('notes_button').onclick = function() {
+  // Checkbox size behavior isn't standardized, and 32px checkboxes look pretty
+  // silly, so instead we're extending the checkbox click area with a wrapper
+  // div.
+  document.getElementById('treeViewBoxTarget').onclick = function() {
+    document.getElementById('treeViewBox').click();
+  };
+  
+  document.getElementById('pageNotesButton').onclick = function() {
 
-    var button_img = document.getElementById('notes_img');
-    var contents_div = document.getElementById('notes_content');
+    var button_img = document.getElementById('pageNotesImg');
+    var contents_div = document.getElementById('pageNotesContent');
     var currently_collapsed =
         button_img.getAttribute('src').lastIndexOf('up.png') === -1;
     if (currently_collapsed) {
@@ -1233,30 +1268,43 @@ window.onload = function() {
   fauna.setDetailControlEvents();
   fauna.preloadDetailControlImages();
 
-  // initialize tree view data structure
+  // Initialize tree view data structure.
   for (var i = 0; i < fauna.categories.length; ++i) {
     fauna.treeCategoryData[fauna.categories[i].id] = [];
   }
 
-  // sigh - apparently style positions set in a css file don't appear
+  // Sigh - apparently style positions set in a css file don't appear
   // in javascript (ff), but they do appear if set in javascript.
-  document.getElementById("detailClose").style.top = "-47px";
+  document.getElementById('thumbsDetailClose').style.top = '-42px';
+  document.getElementById('treeDetailClose').style.top = '8px';
 
-  // cookie to decide thumb or tree view
-  if (document.cookie.indexOf('fView') !== -1) { // tree
+  // Cookie to decide thumb or tree view.
+  if (document.cookie.indexOf('fView') !== -1) { // Tree.
     document.getElementById('treeViewBox').checked = true;
   }
+
+  fauna.updateEventHandler("resize", window, function() {
+    // Redisplay the detail view if needed, in order to pick up the new
+    // dimensions.
+    if (fauna.thumbsDetailDiv.style.visibility === 'visible') {
+      fauna.setThumbsDetailVisible(true);
+    } else if (fauna.treeDetailDiv.style.visibility === 'visible') {
+      fauna.setTreeDetailVisible(true);
+    }
+  });
 };
 
 document.onkeydown = function(event) {
 
-  if (fauna.detailDiv.style.visibility === 'visible' ||
+  if (fauna.thumbsDetailDiv.style.visibility === 'visible' ||
       fauna.treeDetailDiv.style.visibility === 'visible') {
 
-    var scrollDiv = fauna.detailAnimal;
-    var moveDetail = fauna.moveDetail;
-    var setVisible = fauna.setDetailVisible;
-    if (fauna.treeDetailDiv.style.visibility === 'visible') {
+    var scrollDiv, moveDetail, setVisible;
+    if (fauna.thumbsDetailDiv.style.visibility === 'visible') {
+      scrollDiv = fauna.detailAnimal;
+      moveDetail = fauna.moveDetail;
+      setVisible = fauna.setThumbsDetailVisible;
+    } else {
       scrollDiv = fauna.treeDetailImages;
       moveDetail = function() { return; };
       setVisible = fauna.setTreeDetailVisible;
@@ -1301,8 +1349,8 @@ document.onkeydown = function(event) {
     //event.stopPropagation();
     return false;
   }
-  else { // send keyboard events to the detail div
-    return true; // let the browser handle it
+  else { // Send keyboard events to the detail div.
+    return true; // Let the browser handle it.
   }
 };
 
@@ -1356,13 +1404,13 @@ fauna.setDetailControlEvents = function() {
     function() { fauna.detailClickDown('detailFullRight'); };
   detailFullRight.onmouseup =
     function() { fauna.detailClickUp('detailFullRight'); };
-  var detailClose = document.getElementById('detailClose');
-  detailClose.onclick =
-    function() { fauna.setDetailVisible(false); };
-  detailClose.onmousedown =
-    function() { fauna.detailClickDown('detailClose'); };
-  detailClose.onmouseup =
-    function() { fauna.detailClickUp('detailClose'); };
+  var thumbsDetailClose = document.getElementById('thumbsDetailClose');
+  thumbsDetailClose.onclick =
+    function() { fauna.setThumbsDetailVisible(false); };
+  thumbsDetailClose.onmousedown =
+    function() { fauna.detailClickDown('thumbsDetailClose'); };
+  thumbsDetailClose.onmouseup =
+    function() { fauna.detailClickUp('thumbsDetailClose'); };
   var treeDetailClose = document.getElementById('treeDetailClose');
   treeDetailClose.onclick =
     function() { fauna.setTreeDetailVisible(false); };
@@ -1374,7 +1422,7 @@ fauna.setDetailControlEvents = function() {
 
 window.onscroll = function() {
 
-  var offset = fauna.pageYOffset();//window.pageYOffset;
+  var offset = fauna.pageYOffset();
   if (fauna.scrollIsHigh && offset > fauna.staticSelectHeight) {
     fauna.staticSelect.style.visibility = "hidden";
     fauna.fixedSelect.style.visibility = "visible";
@@ -1387,7 +1435,7 @@ window.onscroll = function() {
   }
 };
 
-// find the right event handler for this browser
+// Find the right event handler for this browser.
 if (document.addEventListener) {
   fauna.updateEventHandler = function(event, maybeElement, handler) {
     var element = (typeof(maybeElement) === 'string') ?
@@ -1406,7 +1454,7 @@ else {
   fauna.updateEventHandler = fauna.error_alert;
 }
 
-// find the right pageOffsets for this browser
+// Find the right pageOffsets for this browser.
 if (typeof(window.pageYOffset) == 'number') {
   fauna.pageYOffset = function() { return window.pageYOffset; };
 }
@@ -1419,7 +1467,7 @@ else {
   fauna.pageYOffset = function() { return 0; }
 }
 
-// find the right xmlhttprequest generator for this browser
+// Find the right xmlhttprequest generator for this browser.
 // (based on Javascript: the definitive guide by David Flanagan (O'Reilly 2006))
 var factories = [function() { return new XMLHttpRequest(); },
                  function() { return new ActiveXObject("MSXML2.XMLHTTP"); },
@@ -1441,7 +1489,7 @@ if (!fauna.ajaxObject) {
   fauna.ajaxObject = fauna.error_alert;
 }
 
-// IE8 doesn't support these ... good to know
+// IE8 doesn't support these ... good to know!
 if (!document.ELEMENT_NODE) {
   document.ELEMENT_NODE = 1;
   document.ATTRIBUTE_NODE = 2;
@@ -1595,7 +1643,7 @@ cbSplit._nativeSplit = String.prototype.split;
 
 } // end `if (!cbSplit)`
 
-// for convenience...
+// For convenience...
 String.prototype.split = function (separator, limit) {
     return cbSplit(this, separator, limit);
 };
