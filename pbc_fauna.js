@@ -460,12 +460,12 @@ fauna.createTreeAnimalDetailDiv = function(animal) {
 
   // Images.
   if (animal.nonDNRAnimal) {
-    treeDetailImages.innerHTML = '';
+    fauna.treeDetailImages.innerHTML = '';
     var images = fauna.splitCSVList(animal.images);
     for (var i = 0; i < images.length; ++i) {
       var imageElt = document.createElement('img');
       imageElt.setAttribute('src', 'images/' + images[i] + '.jpg');
-      treeDetailImages.appendChild(imageElt);
+      fauna.treeDetailImages.appendChild(imageElt);
     }
   }
 };
