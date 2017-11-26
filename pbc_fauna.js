@@ -29,25 +29,25 @@ fauna.displayThumbCategory = function(category, data) {
 
   // Sort by common name, except put empty names at the end.
   var sortFunction = function(a, b) {
-    var aFirstImage = parseInt(a.images);
-    var bFirstImage = parseInt(b.images);
-    if (aFirstImage >= fauna.imageCutoff &&
-        bFirstImage < fauna.imageCutoff) {
+
+    if (a.nonDNRAnimal && !b.nonDNRAnimal) {
       return -1;
     }
-    else if (aFirstImage < fauna.imageCutoff &&
-             bFirstImage >= fauna.imageCutoff) {
+    else if (!a.nonDNRAnimal && b.nonDNRAnimal) {
       return 1;
     }
+
     if (a.common === '' && b.common === '') {
       return a.scientific < b.scientific ? 1 : -1;
     }
     else if (b.common === '') {
       return -1;
     }
+
     if (a.common === '') {
       return 1;
     }
+
     return b.common < a.common ? 1 : -1;
   }
   data = data.sort(sortFunction);
@@ -65,8 +65,7 @@ fauna.displayThumbCategory = function(category, data) {
     thumbsDiv.setAttribute('id', thisAnimal.id);
     thumbsDiv.onclick = fauna.createDetailClickHandler(i);
     var tipDiv = document.createElement('div');
-    var images = thisAnimal.images.split(',');
-    if (images[0] < fauna.imageCutoff) {
+    if (!thisAnimal.nonDNRAnimal) {
       // Special category; make the tooltip always visible.
       tipDiv.setAttribute('class', 'nameTipOn');
       fauna.createThumbTip(thisAnimal.common, thisAnimal.scientific,
@@ -82,6 +81,7 @@ fauna.displayThumbCategory = function(category, data) {
                                                    tipDiv, true);
       thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
       // Images.
+      var images = fauna.splitCSVList(thisAnimal.images);
       for (var j = 0; j < images.length; ++j) {
         var thumbContainer = document.createElement('div');
         thumbContainer.setAttribute('class', 'thumbContainer');
@@ -157,9 +157,9 @@ fauna.renewClickHandlers = function() {
       var thisAnimal = data[i];
       var thumbsDiv = document.getElementById(thisAnimal.id);
       thumbsDiv.onclick = fauna.createDetailClickHandler(i);
-      // Renew the tip handlers.
-      var  images = thisAnimal.images.split(',');
-      if (images[0] >= fauna.imageCutoff) { // These need a tip handler.
+      // Renew the tip handlers (DNR animals have their tips permanently
+      // visible, so we can skip those).
+      if (thisAnimal.nonDNRAnimal) {
         var thisId = thisAnimal.id;
         var thumbsDiv = document.getElementById(thisId);
         var tipDiv = document.getElementById(thisId + 'nameTip');
@@ -335,7 +335,7 @@ fauna.preloadImages = function(index) {
     return;
   }
   var animal = fauna.thumbCategoryData[fauna.currentCategory][index];
-  var images = animal.images.split(',');
+  var images = fauna.splitCSVList(animal.images);
   // There's some indication online that individual img objects are
   // necessary to actually preload multiple images.
   var imageRefs = [];
@@ -437,11 +437,10 @@ fauna.createAnimalDetailDiv = function(animal) {
   }
 
   // Images.
-  var images = animal.images.split(',');
-  var firstImageNumber = parseInt(images[0], 10);
-  if (firstImageNumber > fauna.imageCutoff) {
+  if (animal.nonDNRAnimal) {
     var imagesDiv = document.createElement('div');
     imagesDiv.setAttribute('class', 'detailImages');
+    var images = fauna.splitCSVList(animal.images);
     for (var j = 0; j < images.length; ++j) {
       var imageElt = document.createElement('img');
       imageElt.setAttribute('src', 'images/' + images[j] + '.jpg');
@@ -460,9 +459,9 @@ fauna.createTreeAnimalDetailDiv = function(animal) {
     '</i> -- ' + animal.common + '</b>';
 
   // Images.
-  var images = animal.images.split(',');
-  if (images[0] > fauna.imageCutoff) {
+  if (animal.nonDNRAnimal) {
     treeDetailImages.innerHTML = '';
+    var images = fauna.splitCSVList(animal.images);
     for (var i = 0; i < images.length; ++i) {
       var imageElt = document.createElement('img');
       imageElt.setAttribute('src', 'images/' + images[i] + '.jpg');
@@ -832,6 +831,18 @@ fauna.loadAnimalFromXml = function(xmlAnimal) {
   var animalObject = {};
   animalObject.common = fauna.getData(xmlAnimal, 'c');
   animalObject.images = fauna.getData(xmlAnimal, 'i');
+  var firstImageNumber = parseInt(animalObject.images, 10);
+  if (isNaN(firstImageNumber)) { // No images (or a bad list).
+    animalObject.images = '';
+    animalObject.nonDNRAnimal = true;
+  }
+  else if (firstImageNumber < fauna.imageCutoff) {
+    animalObject.images = '';
+    animalObject.nonDNRAnimal = false;
+  }
+  else {
+    animalObject.nonDNRAnimal = true;
+  }
   animalObject.id = fauna.getData(xmlAnimal, 'n');
   animalObject.scientific = fauna.getData(xmlAnimal, 'sc');
   animalObject.history = fauna.getData(xmlAnimal, 'h');
@@ -886,14 +897,14 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
       '</i> -- ' + thisAnimal.common + '</b>';
     animalDiv.appendChild(titleDiv);
     //// Images.
-    var images = thisAnimal.images.split(',');
     // The number of animals added to this category prior to this one
     // = future index of this animal in categoryData (see below).
     var animalCount = categoryData.length;
-    if (images[0] >= fauna.imageCutoff) {
+    if (thisAnimal.nonDNRAnimal) {
       var thumbsDiv = document.createElement('div');
       thumbsDiv.setAttribute('class', 'treeThumbs');
       thumbsDiv.setAttribute('id', 'th' + animalCount);
+      var images = fauna.splitCSVList(thisAnimal.images);
       for (var j = 0; j < images.length; ++j) {
         var thumbContainer = document.createElement('div');
         thumbContainer.setAttribute('class', 'thumbContainer');
@@ -909,6 +920,7 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
       shortAnimal.images = thisAnimal.images;
       shortAnimal.common = thisAnimal.common;
       shortAnimal.scientific = thisAnimal.scientific;
+      shortAnimal.nonDNRAnimal = thisAnimal.nonDNRAnimal;
       categoryData.push(shortAnimal);
       thumbsDiv.onclick = fauna.createTreeThumbsClickHandler(animalCount);
     }
@@ -1548,6 +1560,12 @@ fauna.windowHeight = function() {
     myHeight = document.body.clientHeight;
   }
   return myHeight;
+};
+
+fauna.splitCSVList = function(list) {
+
+  // ''.split(',') is normally [""].
+  return list === '' ? [] : list.split(',');
 };
 
 /* Cross-Browser Split 1.0.1
