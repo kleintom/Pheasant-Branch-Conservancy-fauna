@@ -37,6 +37,13 @@ fauna.displayThumbCategory = function(category, data) {
       return 1;
     }
 
+    if (a.images && !b.images) {
+      return -1;
+    }
+    else if (!a.images && b.images) {
+      return 1;
+    }
+
     if (a.common === '' && b.common === '') {
       return a.scientific < b.scientific ? 1 : -1;
     }
@@ -65,11 +72,11 @@ fauna.displayThumbCategory = function(category, data) {
     thumbsDiv.setAttribute('id', thisAnimal.id);
     thumbsDiv.onclick = fauna.createDetailClickHandler(i);
     var tipDiv = document.createElement('div');
-    if (!thisAnimal.nonDNRAnimal) {
+    if (!thisAnimal.nonDNRAnimal || thisAnimal.images === '') {
       // Special category; make the tooltip always visible.
       tipDiv.setAttribute('class', 'nameTipOn');
       fauna.createThumbTip(thisAnimal.common, thisAnimal.scientific,
-                           tipDiv, false);
+                           tipDiv, false, !thisAnimal.nonDNRAnimal);
       thumbsDiv.style.width = "200px";
       // No images.
     }
@@ -78,7 +85,7 @@ fauna.displayThumbCategory = function(category, data) {
       tipDiv.setAttribute('id', thisAnimal.id + 'nameTip');
       thumbsDiv.onmouseover = fauna.createThumbTip(thisAnimal.common,
                                                    thisAnimal.scientific,
-                                                   tipDiv, true);
+                                                   tipDiv, true, false);
       thumbsDiv.onmouseout = fauna.cancelThumbTip(tipDiv);
       // Images.
       var images = fauna.splitCSVList(thisAnimal.images);
@@ -103,11 +110,11 @@ fauna.displayThumbCategory = function(category, data) {
 // <returnDisplayer> is true then return a function that schedules
 // display of the tip, otherwise make the tip permanently visible.
 fauna.createThumbTip = function(common, scientific, tipDiv,
-                                returnDisplayer) {
+                                returnDisplayer, displayDNRNote) {
 
   var displayText = "";
-  // Hack for special DNR prairie insect survey.
-  if (!returnDisplayer) {
+
+  if (displayDNRNote) {
     displayText = "<strong>WI DNR Prairie Insect Survey:</strong> ";
   }
   if (common !== "" && scientific !== "") {
@@ -437,7 +444,7 @@ fauna.createAnimalDetailDiv = function(animal) {
   }
 
   // Images.
-  if (animal.nonDNRAnimal) {
+  if (animal.nonDNRAnimal && animal.images.length) {
     var imagesDiv = document.createElement('div');
     imagesDiv.setAttribute('class', 'detailImages');
     var images = fauna.splitCSVList(animal.images);
@@ -900,7 +907,7 @@ fauna.addTreeViewAnimalDivs = function(animals, parent) {
     // The number of animals added to this category prior to this one
     // = future index of this animal in categoryData (see below).
     var animalCount = categoryData.length;
-    if (thisAnimal.nonDNRAnimal) {
+    if (thisAnimal.nonDNRAnimal && thisAnimal.images) {
       var thumbsDiv = document.createElement('div');
       thumbsDiv.setAttribute('class', 'treeThumbs');
       thumbsDiv.setAttribute('id', 'th' + animalCount);
