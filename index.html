@@ -6,7 +6,7 @@
   <title>PBC fauna</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" type="text/css" href="pbc_fauna.css" />
-  <script type="text/javascript" src="pbc_fauna.js"></script>
+  <script src="pbc_fauna.js"></script>
 </head>
 
 <body>
@@ -174,29 +174,15 @@
   </div>
   <div id="treeFauna"></div>
   <div id="thumbFauna"></div>
-</div>
-
-<div id="screenDiv"></div>
-<div id="thumbsDetailDiv" class="detailDiv">
-  <div id="detailControls">
-    <img id="detailFullLeft" src="images/fullLeft.png" alt="Move to first animal" width="45" height="35" />
-    <img id="detailLeft" src="images/left.png" alt="Move to previous animal" width="45" height="35" />
-    <span id="detailCount"></span>
-    <img id="detailRight" src="images/right.png" alt="Move to next animal" width="45" height="35" />
-    <img id="detailFullRight" src="images/fullRight.png" alt="Move to last animal" width="45" height="35" />
+  <div id="thumbsDetailDiv">
+    <img id="thumbsDetailMarker" src="images/triangle.png"
+         alt="Marker to point to the original thumbs which this div is showing full-sized" />
+    <div id="thumbsDetailTitle"></div>
+    <div>
+      <img id="thumbsDetailClose" src="images/close.png" alt="Close detail view" />
+    </div>
+    <div id="detailAnimal"></div>
   </div>
-  <div>
-    <img id="thumbsDetailClose" class="detailClose" src="images/close.png" alt="Close detail view" width="35" height="35" />
-  </div>
-  <div id="detailAnimal"></div>
-</div>
-
-<div id="treeDetailDiv" class="detailDiv">
-  <div>
-    <img id="treeDetailClose" class="detailClose" src="images/close.png" alt="Close detail view" width="35" height="35" />
-  </div>
-  <div id="treeDetailTitle"></div>
-  <div id="treeDetailImages" class="detailImages"></div>
 </div>
 
 </body>
